@@ -604,13 +604,14 @@ function renderTasks(){
       var db=el("button","cat-icon-btn","×");
       db.onclick=(function(cid){return function(e){e.stopPropagation();deleteCat(cid);};})(cat.id);
       ch.appendChild(eb);ch.appendChild(db);cb.appendChild(ch);
-      ct.forEach(function(t){
-        cb.appendChild(makeCard(t));
+      ct.forEach(function(t){cb.appendChild(makeCard(t));});
+      if(ct.length>0){
+        var lastT=ct[ct.length-1];
         var aw=el("div","add-below-wrap");
         var ab=el("button","add-below-btn","+ Lägg till");
-        ab.onclick=(function(id){return function(e){e.stopPropagation();addTaskBelow(id);};})(t.id);
+        ab.onclick=(function(id){return function(e){e.stopPropagation();addTaskBelow(id);};})(lastT.id);
         aw.appendChild(ab);cb.appendChild(aw);
-      });
+      }
       wrap.appendChild(cb);
     });
     var ucat=pt.filter(function(t){return !t.cat||!cats.find(function(c){return c.id===t.cat;});});
@@ -619,22 +620,24 @@ function renderTasks(){
       if(cats.length>0){
         var ub=el("div","cat-block");
         var uh=el("div","cat-header");uh.appendChild(el("span","cat-name faded","Övriga"));ub.appendChild(uh);
-        ucat.forEach(function(t){
-          ub.appendChild(makeCard(t));
+        ucat.forEach(function(t){ub.appendChild(makeCard(t));});
+        if(ucat.length>0){
+          var lastU=ucat[ucat.length-1];
           var aw=el("div","add-below-wrap");
           var ab=el("button","add-below-btn","+ Lägg till");
-          ab.onclick=(function(id){return function(e){e.stopPropagation();addTaskBelow(id);};})(t.id);
+          ab.onclick=(function(id){return function(e){e.stopPropagation();addTaskBelow(id);};})(lastU.id);
           aw.appendChild(ab);ub.appendChild(aw);
-        });
+        }
         wrap.appendChild(ub);
       } else {
-        ucat.forEach(function(t){
-          wrap.appendChild(makeCard(t));
+        ucat.forEach(function(t){wrap.appendChild(makeCard(t));});
+        if(ucat.length>0){
+          var lastB=ucat[ucat.length-1];
           var aw=el("div","add-below-wrap");
           var ab=el("button","add-below-btn","+ Lägg till");
-          ab.onclick=(function(id){return function(e){e.stopPropagation();addTaskBelow(id);};})(t.id);
+          ab.onclick=(function(id){return function(e){e.stopPropagation();addTaskBelow(id);};})(lastB.id);
           aw.appendChild(ab);wrap.appendChild(aw);
-        });
+        }
       }
     }
   });
