@@ -187,16 +187,36 @@ var T=[
 var ap="all",archOpen=false,openPop=null,editCat=null;
 var dragTask=null,dragCat=null,dragProj=null;
 
-function save(){try{localStorage.setItem("km_p",JSON.stringify(P));localStorage.setItem("km_t",JSON.stringify(T));}catch(e){}}
+var dbReady=false;
+var saveTimer=null;
+function save(){
+  try{localStorage.setItem("km_p",JSON.stringify(P));localStorage.setItem("km_t",JSON.stringify(T));}catch(e){}
+  if(!dbReady)return;
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(function(){
+    var db=window._fbDb;if(!db)return;
+    var setDoc=window._fbFirestore.setDoc,doc=window._fbFirestore.doc;
+    setDoc(doc(db,"attgora","data"),{projects:JSON.stringify(P),tasks:JSON.stringify(T)}).catch(function(e){console.error("Firebase save",e);});
+  },500);
+}
 function load(){
   try{
     var p=localStorage.getItem("km_p"),t=localStorage.getItem("km_t");
     if(p)P=JSON.parse(p);
-    if(t){
-      T=JSON.parse(t);
-      T.forEach(function(tx){if(!tx.subs)tx.subs=[];});
-    }
+    if(t){T=JSON.parse(t);T.forEach(function(tx){if(!tx.subs)tx.subs=[];});}
   }catch(e){}
+  var db=window._fbDb;
+  if(!db){dbReady=true;return;}
+  var getDoc=window._fbFirestore.getDoc,doc=window._fbFirestore.doc;
+  getDoc(doc(db,"attgora","data")).then(function(snap){
+    if(snap.exists()){
+      var d=snap.data();
+      if(d.projects)P=JSON.parse(d.projects);
+      if(d.tasks){T=JSON.parse(d.tasks);T.forEach(function(tx){if(!tx.subs)tx.subs=[];});}
+      render();
+    }
+    dbReady=true;
+  }).catch(function(e){console.error("Firebase load",e);dbReady=true;});
 }
 
 document.addEventListener("click",function(e){
@@ -703,6 +723,23 @@ render=function(){_origRender();
 };
 
 load();render();
+</script>
+<script type="module">
+  import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import{getFirestore,doc,getDoc,setDoc}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  const firebaseConfig={
+    apiKey:"AIzaSyA2P9vg7FxRrDUwUGxEtAGDhESyuGS_d4o",
+    authDomain:"att-gora-c2b2d.firebaseapp.com",
+    projectId:"att-gora-c2b2d",
+    storageBucket:"att-gora-c2b2d.firebasestorage.app",
+    messagingSenderId:"245813603630",
+    appId:"1:245813603630:web:b8eecf98a0c5eef3785ebf"
+  };
+  const app=initializeApp(firebaseConfig);
+  window._fbDb=getFirestore(app);
+  window._fbFirestore={doc,getDoc,setDoc};
+  // Re-run load now that Firebase is ready
+  load();
 </script>
 </body>
 </html>
