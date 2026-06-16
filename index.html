@@ -107,6 +107,75 @@ body{font-family:"EB Garamond",Georgia,serif;background:#EDECEA;min-height:100vh
 .swatch{width:18px;height:18px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:transform 0.1s;flex-shrink:0;display:inline-block}
 .swatch:hover{transform:scale(1.15)}
 .swatch.sel{border-color:var(--s)}
+
+.main-nav{display:flex;gap:0;margin-bottom:1.25rem;border-bottom:2px solid var(--sand)}
+.main-nav-btn{background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;padding:6px 18px;font-family:"EB Garamond",Georgia,serif;font-size:14px;color:var(--sage);cursor:pointer;transition:all 0.15s;font-weight:500}
+.main-nav-btn:hover{color:var(--s)}
+.main-nav-btn.active{color:var(--s);border-bottom-color:var(--o)}
+/* --- DEADLINE & PRIORITY --- */
+.deadline-btn{background:none;border:none;cursor:pointer;color:var(--sage);font-size:12px;font-family:"EB Garamond",Georgia,serif;padding:1px 4px;border-radius:var(--r);flex-shrink:0;display:inline-flex;align-items:center;gap:3px;transition:color 0.15s}
+.deadline-btn:hover{color:var(--s)}
+.deadline-btn.has-date{color:var(--s);font-weight:500}
+.deadline-btn.soon{color:#8B5E00;font-weight:600}
+.deadline-btn.overdue{color:#c0392b;font-weight:600}
+.task-card.deadline-soon{border-left:3px solid #EF9F27;background:#FFFBF5}
+.task-card.deadline-overdue{border-left:3px solid #c0392b;background:#FFF5F5}
+.prio-ref-card.deadline-soon{border-left:3px solid #EF9F27;background:#FFFBF5}
+.prio-ref-card.deadline-overdue{border-left:3px solid #c0392b;background:#FFF5F5}
+.cal-cell.has-soon{background:#FFFBF5}
+.cal-cell.has-overdue{background:#FFF5F5}
+.cal-task-chip.chip-soon{border-left:2px solid #EF9F27}
+.cal-task-chip.chip-overdue{border-left:2px solid #c0392b}
+.deadline-input{font-family:"EB Garamond",Georgia,serif;font-size:12px;border:1px solid var(--sand);border-radius:var(--r);padding:2px 6px;color:var(--s);background:white;outline:none;cursor:pointer}
+.deadline-input:focus{border-color:var(--s)}
+.prio-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:1px 3px;flex-shrink:0;line-height:1;opacity:0.35;transition:opacity 0.15s}
+.prio-btn.on{opacity:1}
+.task-card:hover .prio-btn{opacity:0.6}
+.task-card:hover .prio-btn.on{opacity:1}
+/* --- PRIO SECTION --- */
+.prio-section{margin-bottom:1.2rem;background:#FFFBF5;border:1px solid #EFC96A;border-radius:var(--r);padding:10px 14px}
+.prio-section-title{font-size:11px;font-weight:600;color:#624500;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.prio-ref-card{background:white;border:1px solid var(--sand);border-radius:var(--r);margin-bottom:4px;overflow:visible}
+.prio-ref-card:hover{border-color:var(--sage)}
+/* --- CALENDAR TAB --- */
+.cal-wrap{padding:0}
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.cal-nav-btn{background:none;border:1px solid var(--sand);border-radius:var(--r);cursor:pointer;padding:4px 10px;font-family:"EB Garamond",Georgia,serif;font-size:13px;color:var(--s)}
+.cal-nav-btn:hover{background:var(--s);color:var(--w)}
+.cal-month-label{font-size:16px;font-weight:600;color:var(--s);letter-spacing:0.01em}
+.cal-grid{display:grid;grid-template-columns:28px repeat(7,1fr);gap:3px}
+.cal-day-name{font-size:11px;color:var(--sage);text-align:center;padding:3px 0;font-weight:500;letter-spacing:0.04em;text-transform:uppercase}
+.cal-week-num{font-size:10px;color:var(--sand);text-align:center;padding:3px 0;font-weight:600;letter-spacing:0.02em;display:flex;align-items:center;justify-content:center}
+.cal-week-label{font-size:9px;color:var(--sand);text-align:center;padding:3px 0;font-weight:500;letter-spacing:0.03em;text-transform:uppercase;display:flex;align-items:center;justify-content:center}
+.cal-cell{height:90px;overflow:hidden;background:white;border:1px solid var(--sand);border-radius:var(--r);padding:4px 5px;position:relative}
+.cal-cell.other-month{background:#F8F6F2;opacity:0.5}
+.cal-cell.today{border-color:var(--o);border-width:1.5px}
+.cal-date-num{font-size:11px;font-weight:600;color:var(--sage);margin-bottom:3px}
+.cal-cell.today .cal-date-num{color:var(--o)}
+.cal-task-chip{font-size:10px;font-family:"EB Garamond",Georgia,serif;border-radius:3px;padding:1px 4px;margin-bottom:2px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;line-height:1.4}
+.cal-task-chip:hover{opacity:0.8}
+.cal-more{font-size:10px;color:var(--sage);font-style:italic;margin-top:1px}
+
+/* --- DEADLINE TIMELINE --- */
+.timeline-wrap{margin-top:1.5rem}
+.timeline-title{font-size:11px;font-weight:600;color:var(--sage);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:0.9rem;padding-bottom:5px;border-bottom:1px solid var(--sand)}
+.timeline-title.tl-title-overdue{color:#c0392b;border-bottom-color:#F09595}
+.tl-group{margin-bottom:1.1rem}
+.tl-date-label{font-size:11px;font-weight:600;color:var(--sage);letter-spacing:0.03em;text-transform:uppercase;margin-bottom:4px;display:flex;align-items:center;gap:7px}
+.tl-date-label::after{content:"";flex:1;height:1px;background:var(--sand)}
+.tl-date-label.tl-overdue{color:#c0392b}
+.tl-date-label.tl-soon{color:#8B5E00}
+.tl-date-label.tl-today{color:var(--o)}
+.tl-row{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:var(--r);border:1px solid var(--sand);background:white;margin-bottom:3px;cursor:pointer;transition:border-color 0.15s}
+.tl-row:hover{border-color:var(--sage)}
+.tl-row.tl-row-overdue{border-left:3px solid #c0392b;background:#FFF5F5}
+.tl-row.tl-row-soon{border-left:3px solid #EF9F27;background:#FFFBF5}
+.tl-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.tl-text{font-size:13px;color:var(--s);flex:1}
+.tl-badge{font-size:11px;padding:1px 7px;border-radius:8px;font-family:"EB Garamond",Georgia,serif;flex-shrink:0}
+.tl-days{font-size:11px;color:var(--sage);flex-shrink:0;font-style:italic}
+.tl-days.overdue{color:#c0392b;font-style:normal;font-weight:600}
+.tl-days.soon{color:#8B5E00;font-weight:600;font-style:normal}
 </style>
 </head>
 <body>
@@ -118,7 +187,13 @@ body{font-family:"EB Garamond",Georgia,serif;background:#EDECEA;min-height:100vh
     </h1>
     <button class="btn" id="newProjBtn">+ Nytt projekt</button>
   </div>
+  <div class="main-nav" id="mainNav">
+    <button class="main-nav-btn active" id="navTasks">Uppgifter</button>
+    <button class="main-nav-btn" id="navCal">Kalender</button>
+  </div>
+  <div id="taskSection">
   <div class="tabs" id="tabs"></div>
+  <div id="prioSection" class="prio-section" style="display:none"><div class="prio-section-title">⭐ Prioriterade</div><div id="prioList"></div></div>
   <div class="add-row">
     <input type="text" id="newTask" placeholder="Ny uppgift…">
     <select id="taskProj"></select>
@@ -126,6 +201,8 @@ body{font-family:"EB Garamond",Georgia,serif;background:#EDECEA;min-height:100vh
     <button class="btn" id="addTaskBtn">+ Lägg till</button>
   </div>
   <div id="taskList"></div>
+  </div><!-- end taskSection -->
+  <div id="calView" style="display:none" class="cal-wrap"></div>
   <div id="emptyMsg" class="empty" style="display:none">Inga aktiva uppgifter i denna vy.</div>
   <div id="catPanel" style="display:none;margin-top:0.75rem;background:white;border:1px solid var(--sand);border-radius:var(--r);padding:12px 14px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
@@ -207,7 +284,7 @@ function load(){
   try{
     var p=localStorage.getItem("km_p"),t=localStorage.getItem("km_t");
     if(p)P=JSON.parse(p);
-    if(t){T=JSON.parse(t);T.forEach(function(tx){if(!tx.subs)tx.subs=[];});}
+    if(t){T=JSON.parse(t);T.forEach(function(tx){if(!tx.subs)tx.subs=[];if(tx.deadline===undefined)tx.deadline=null;if(tx.prio===undefined)tx.prio=false;});}
   }catch(e){}
   var db=window._fbDb;
   if(!db){dbReady=true;return;}
@@ -216,7 +293,7 @@ function load(){
     if(snap.exists()){
       var d=snap.data();
       if(d.projects)P=JSON.parse(d.projects);
-      if(d.tasks){T=JSON.parse(d.tasks);T.forEach(function(tx){if(!tx.subs)tx.subs=[];});}
+      if(d.tasks){T=JSON.parse(d.tasks);T.forEach(function(tx){if(!tx.subs)tx.subs=[];if(tx.deadline===undefined)tx.deadline=null;if(tx.prio===undefined)tx.prio=false;});}
       render();
     }
     dbReady=true;
@@ -242,6 +319,9 @@ document.getElementById("archBtn").onclick=function(){
   document.getElementById("archBtn").classList.toggle("open",archOpen);
   renderArch();
 };
+
+document.getElementById("navTasks").onclick=function(){setMainView("tasks");};
+document.getElementById("navCal").onclick=function(){setMainView("cal");};
 
 function setProj(id){if(openPop){openPop=null;renderTabs();return;}ap=id;render();}
 
@@ -442,6 +522,7 @@ function renderTabs(){
     }
     wrap.appendChild(pw);
   });
+
 }
 
 function renderSel(){
@@ -493,6 +574,41 @@ function makeCard(t){
     eb.onclick=(function(id){return function(e){e.stopPropagation();var tx=T.find(function(x){return x.id===id;});if(tx){tx.edit=true;renderTasks();setTimeout(function(){var e=document.getElementById("ei_"+id);if(e){e.focus();e.select();}},30);}};})(t.id);
     main.appendChild(eb);
   }
+  // Priority button
+  var prioBtn=el("button","prio-btn"+(t.prio?" on":""),"⭐");
+  prioBtn.title=t.prio?"Ta bort prioritering":"Prioritera";
+  prioBtn.onclick=(function(id){return function(e){e.stopPropagation();var tx=T.find(function(x){return x.id===id;});if(tx){tx.prio=!tx.prio;save();render();}};})(t.id);
+  main.appendChild(prioBtn);
+
+  // Deadline button
+  var today=new Date();today.setHours(0,0,0,0);
+  var endOfWeek=new Date(today);var dow=today.getDay();var daysToSun=dow===0?0:7-dow;endOfWeek.setDate(today.getDate()+daysToSun);
+  var dl=t.deadline?new Date(t.deadline):null;
+  var isOverdue=dl&&dl<today;
+  var isSoon=dl&&!isOverdue&&dl<=endOfWeek;
+  if(isOverdue)card.classList.add("deadline-overdue");
+  else if(isSoon)card.classList.add("deadline-soon");
+  var dlClass="deadline-btn"+(t.deadline?" has-date":"")+(isOverdue?" overdue":isSoon?" soon":"");
+  var dlLabel=t.deadline?fd(t.deadline):"📅";
+  var dlBtn=el("button",dlClass,dlLabel);
+  dlBtn.title=t.deadline?"Ändra deadline":"Sätt deadline";
+  dlBtn.onclick=(function(id){return function(e){
+    e.stopPropagation();
+    var tx=T.find(function(x){return x.id===id;});if(!tx)return;
+    var inp=document.createElement("input");inp.type="date";inp.className="deadline-input";
+    if(tx.deadline)inp.value=tx.deadline;
+    inp.onchange=function(){tx.deadline=inp.value||null;save();renderTasks();};
+    inp.onblur=function(){if(document.contains(inp))inp.parentNode&&inp.parentNode.replaceChild(dlBtn,inp);};
+    this.parentNode.replaceChild(inp,this);
+    inp.focus();inp.showPicker&&inp.showPicker();
+  };})(t.id);
+  // Right-click or long press to clear deadline
+  dlBtn.oncontextmenu=(function(id){return function(e){
+    e.preventDefault();e.stopPropagation();
+    var tx=T.find(function(x){return x.id===id;});if(tx){tx.deadline=null;save();renderTasks();}
+  };})(t.id);
+  main.appendChild(dlBtn);
+
   var expBtn=el("button","icon-btn",t.exp?"▴":"▾");
   expBtn.onclick=(function(id){return function(e){e.stopPropagation();var tx=T.find(function(x){return x.id===id;});if(tx){tx.exp=!tx.exp;save();renderTasks();}};})(t.id);
   main.appendChild(expBtn);
@@ -546,6 +662,18 @@ function makeCard(t){
     dr1.appendChild(ss2);
     if(t.doneAt){dr1.appendChild(el("span","tdate","✓ "+fd(t.doneAt)));}
     det.appendChild(dr1);
+    var dr1b=el("div","drow");
+    dr1b.appendChild(el("span","dlabel","Deadline"));
+    var dlInp=document.createElement("input");dlInp.type="date";dlInp.className="deadline-input";
+    if(t.deadline)dlInp.value=t.deadline;
+    dlInp.onchange=(function(id){return function(){var tx=T.find(function(x){return x.id===id;});if(tx){tx.deadline=this.value||null;save();renderTasks();}};})(t.id);
+    dr1b.appendChild(dlInp);
+    if(t.deadline){
+      var clrDl=el("button","icon-btn","✕");clrDl.title="Ta bort deadline";clrDl.style.fontSize="11px";
+      clrDl.onclick=(function(id){return function(){var tx=T.find(function(x){return x.id===id;});if(tx){tx.deadline=null;save();renderTasks();}};})(t.id);
+      dr1b.appendChild(clrDl);
+    }
+    det.appendChild(dr1b);
     var dr2=el("div","drow");
     dr2.appendChild(el("span","dlabel","Kommentar"));
     var ta=document.createElement("textarea");ta.className="comment-box";ta.placeholder="Anteckna mer om uppgiften…";ta.value=t.comment||"";
@@ -560,9 +688,222 @@ function makeCard(t){
   return card;
 }
 
+
+function renderPrio(){
+  var prioSec=document.getElementById("prioSection");
+  var prioList=document.getElementById("prioList");
+  if(!prioSec||!prioList)return;
+  var prioTasks=T.filter(function(t){return t.prio&&!t.arch&&!t.done;});
+  if(prioTasks.length===0){prioSec.style.display="none";return;}
+  prioSec.style.display="";
+  prioList.innerHTML="";
+  prioTasks.forEach(function(t){
+    var c=cf(t.proj),proj=P.find(function(p){return p.id===t.proj;});
+    var card=el("div","prio-ref-card");
+    var main=el("div","task-main");
+    var cb=document.createElement("input");cb.type="checkbox";if(t.done)cb.checked=true;
+    cb.onchange=(function(id){return function(){toggleDone(id);};})(t.id);
+    main.appendChild(cb);
+    main.appendChild(el("span","task-text",t.text));
+    if(t.deadline){
+      var dlToday=new Date();dlToday.setHours(0,0,0,0);
+      var dlEow=new Date(dlToday);var dlDow=dlToday.getDay();dlEow.setDate(dlToday.getDate()+(dlDow===0?0:7-dlDow));
+      var dlD=new Date(t.deadline);
+      var isOvd=dlD<dlToday,isSn=!isOvd&&dlD<=dlEow;
+      if(isOvd)card.classList.add("deadline-overdue");
+      else if(isSn)card.classList.add("deadline-soon");
+      var dlCls="deadline-btn has-date"+(isOvd?" overdue":isSn?" soon":"");
+      main.appendChild(el("span",dlCls,"📅 "+fd(t.deadline)));
+    }
+    if(proj){
+      var bdg=el("span","badge",proj.name);
+      bdg.style.background=c.bg;bdg.style.color=c.tx;bdg.style.border="1px solid "+c.bo;
+      main.appendChild(bdg);
+    }
+    var unprioBtn=el("button","prio-btn on","⭐");
+    unprioBtn.title="Ta bort prioritering";
+    unprioBtn.onclick=(function(id){return function(e){e.stopPropagation();var tx=T.find(function(x){return x.id===id;});if(tx){tx.prio=false;save();render();}};})(t.id);
+    main.appendChild(unprioBtn);
+    card.appendChild(main);
+    prioList.appendChild(card);
+  });
+}
+
+function renderCal(){
+  var wrap=document.getElementById("calView");wrap.innerHTML="";
+  var now=new Date();
+  if(typeof window._calYear==="undefined"){window._calYear=now.getFullYear();window._calMonth=now.getMonth();}
+  var y=window._calYear,m=window._calMonth;
+  var monthNames=["Januari","Februari","Mars","April","Maj","Juni","Juli","Augusti","September","Oktober","November","December"];
+  // Nav
+  var nav=el("div","cal-nav");
+  var prev=el("button","cal-nav-btn","‹");
+  prev.onclick=function(){window._calMonth--;if(window._calMonth<0){window._calMonth=11;window._calYear--;}renderCal();};
+  var next=el("button","cal-nav-btn","›");
+  next.onclick=function(){window._calMonth++;if(window._calMonth>11){window._calMonth=0;window._calYear++;}renderCal();};
+  nav.appendChild(prev);
+  nav.appendChild(el("span","cal-month-label",monthNames[m]+" "+y));
+  nav.appendChild(next);
+  wrap.appendChild(nav);
+  // Grid
+  var grid=el("div","cal-grid");
+  grid.appendChild(el("div","cal-week-label","V"));
+  var dayNames=["Mån","Tis","Ons","Tor","Fre","Lör","Sön"];
+  dayNames.forEach(function(d){grid.appendChild(el("div","cal-day-name",d));});
+
+  function getISOWeek(date){
+    var d=new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate()));
+    var day=d.getUTCDay()||7;
+    d.setUTCDate(d.getUTCDate()+4-day);
+    var yearStart=new Date(Date.UTC(d.getUTCFullYear(),0,1));
+    return Math.ceil((((d-yearStart)/86400000)+1)/7);
+  }
+  // First day of month (Monday-based)
+  var first=new Date(y,m,1);
+  var startDow=first.getDay();if(startDow===0)startDow=7;
+  var daysInMonth=new Date(y,m+1,0).getDate();
+  var prevDays=new Date(y,m,0).getDate();
+  var todayStr=now.toISOString().slice(0,10);
+  // Tasks with deadlines this month
+  var tasksByDate={};
+  T.filter(function(t){return t.deadline&&!t.arch;}).forEach(function(t){
+    if(!tasksByDate[t.deadline])tasksByDate[t.deadline]=[];
+    tasksByDate[t.deadline].push(t);
+  });
+  // Fill prev month - insert week num before first cell of each row
+  var colPos=0; // 0-6, position within week row
+  function maybeInsertWeekNum(dateForWeek){
+    if(colPos===0){
+      grid.appendChild(el("div","cal-week-num",String(getISOWeek(dateForWeek))));
+    }
+    colPos=(colPos+1)%7;
+  }
+  for(var i=startDow-1;i>0;i--){
+    var prevDate=new Date(y,m,-(i-1));
+    maybeInsertWeekNum(prevDate);
+    var cell=el("div","cal-cell other-month");
+    cell.appendChild(el("div","cal-date-num",String(prevDays-i+1)));
+    grid.appendChild(cell);
+  }
+  // Fill current month
+  for(var d=1;d<=daysInMonth;d++){
+    var dateStr=y+"-"+(m+1<10?"0":"")+(m+1)+"-"+(d<10?"0":"")+d;
+    maybeInsertWeekNum(new Date(y,m,d));
+    var cell=el("div","cal-cell"+(dateStr===todayStr?" today":""));
+    cell.appendChild(el("div","cal-date-num",String(d)));
+    var tasks=tasksByDate[dateStr]||[];
+    var maxShow=3;
+    var calToday=new Date();calToday.setHours(0,0,0,0);
+    var calEow=new Date(calToday);var calDow=calToday.getDay();calEow.setDate(calToday.getDate()+(calDow===0?0:7-calDow));
+    tasks.slice(0,maxShow).forEach(function(t){
+      var c=cf(t.proj);
+      var dlD=new Date(t.deadline);
+      var isOvd=dlD<calToday,isSn=!isOvd&&dlD<=calEow;
+      if(isOvd&&!cell.classList.contains("has-overdue"))cell.classList.add("has-overdue");
+      else if(isSn&&!cell.classList.contains("has-overdue")&&!cell.classList.contains("has-soon"))cell.classList.add("has-soon");
+      var chipCls="cal-task-chip"+(isOvd?" chip-overdue":isSn?" chip-soon":"");
+      var chip=el("span",chipCls,t.text);
+      chip.style.background=c.bg;chip.style.color=c.tx;
+      chip.onclick=(function(id){return function(){
+        var tx=T.find(function(x){return x.id===id;});
+        if(tx){ap=tx.proj;tx.exp=true;setMainView("tasks");setTimeout(function(){var el=document.getElementById("tc_"+id);if(el)el.scrollIntoView({behavior:"smooth",block:"center"});},200);}
+      };})(t.id);
+      cell.appendChild(chip);
+    });
+    if(tasks.length>maxShow)cell.appendChild(el("div","cal-more","+"+(tasks.length-maxShow)+" till"));
+    grid.appendChild(cell);
+  }
+  // Fill next month
+  var totalCells=(startDow-1)+daysInMonth;
+  var remaining=(7-totalCells%7)%7;
+  for(var n=1;n<=remaining;n++){
+    maybeInsertWeekNum(new Date(y,m+1,n));
+    var cell=el("div","cal-cell other-month");
+    cell.appendChild(el("div","cal-date-num",String(n)));
+    grid.appendChild(cell);
+  }
+  wrap.appendChild(grid);
+
+  // --- Deadline timeline ---
+  var tlAllTasks=T.filter(function(t){return t.deadline&&!t.arch&&!t.done;});
+  tlAllTasks.sort(function(a,b){return a.deadline<b.deadline?-1:a.deadline>b.deadline?1:0;});
+  if(tlAllTasks.length===0)return;
+  var tlToday=new Date();tlToday.setHours(0,0,0,0);
+  var todayISO=tlToday.toISOString().slice(0,10);
+  var ovdTasks=tlAllTasks.filter(function(t){return new Date(t.deadline)<tlToday;});
+  var upcomTasks=tlAllTasks.filter(function(t){return new Date(t.deadline)>=tlToday;});
+
+  function makeTlRow(t,isOvd,isSn){
+    var c=cf(t.proj),proj=P.find(function(p){return p.id===t.proj;});
+    var rowCls="tl-row"+(isOvd?" tl-row-overdue":isSn?" tl-row-soon":"");
+    var row=el("div",rowCls);
+    var dot=el("span","tl-dot");dot.style.background=c.sw;row.appendChild(dot);
+    row.appendChild(el("span","tl-text",t.text));
+    if(proj){var bdg=el("span","tl-badge",proj.name);bdg.style.background=c.bg;bdg.style.color=c.tx;bdg.style.border="1px solid "+c.bo;row.appendChild(bdg);}
+    row.onclick=(function(id,pid){return function(){ap=pid;setMainView("tasks");setTimeout(function(){var tx=T.find(function(x){return x.id===id;});if(tx)tx.exp=true;renderTasks();setTimeout(function(){var el=document.getElementById("tc_"+id);if(el)el.scrollIntoView({behavior:"smooth",block:"center"});},80);},150);};})(t.id,t.proj);
+    return row;
+  }
+
+  function buildGroups(tasks){
+    var groups={};var order=[];
+    tasks.forEach(function(t){if(!groups[t.deadline]){groups[t.deadline]=[];order.push(t.deadline);}groups[t.deadline].push(t);});
+    return{groups:groups,order:order};
+  }
+
+  var tlWrap=el("div","timeline-wrap");
+
+  // --- Overdue section ---
+  if(ovdTasks.length>0){
+    tlWrap.appendChild(el("div","timeline-title tl-title-overdue","Förfallna ("+ovdTasks.length+")"));
+    var ovd=buildGroups(ovdTasks);
+    ovd.order.forEach(function(dateStr){
+      var dlD=new Date(dateStr);
+      var diffDays=Math.round((tlToday-dlD)/(1000*60*60*24));
+      var dayLabel=diffDays===1?"1 dag sedan":diffDays+" dagar sedan";
+      var dateFormatted=dlD.toLocaleDateString("sv-SE",{weekday:"short",month:"short",day:"numeric"});
+      var grpEl=el("div","tl-group");
+      grpEl.appendChild(el("div","tl-date-label tl-overdue",dateFormatted.charAt(0).toUpperCase()+dateFormatted.slice(1)+" — "+dayLabel));
+      ovd.groups[dateStr].forEach(function(t){grpEl.appendChild(makeTlRow(t,true,false));});
+      tlWrap.appendChild(grpEl);
+    });
+  }
+
+  // --- Upcoming: split into this week vs later ---
+  var tlEow=new Date(tlToday);var tlDow=tlToday.getDay();tlEow.setDate(tlToday.getDate()+(tlDow===0?0:7-tlDow));
+  var thisWeekTasks=upcomTasks.filter(function(t){return new Date(t.deadline)<=tlEow;});
+  var laterTasks=upcomTasks.filter(function(t){return new Date(t.deadline)>tlEow;});
+
+  function renderTlGroup(tasks,isSoonGroup){
+    var g=buildGroups(tasks);
+    g.order.forEach(function(dateStr){
+      var dlD=new Date(dateStr);
+      var isToday=dateStr===todayISO;
+      var diffDays=Math.round((dlD-tlToday)/(1000*60*60*24));
+      var dayLabel=isToday?"Idag":diffDays===1?"Imorgon":"Om "+diffDays+" dagar";
+      var dateFormatted=dlD.toLocaleDateString("sv-SE",{weekday:"short",month:"short",day:"numeric"});
+      var lblCls="tl-date-label"+(isSoonGroup?" tl-soon":isToday?" tl-today":"");
+      var grpEl=el("div","tl-group");
+      grpEl.appendChild(el("div",lblCls,dateFormatted.charAt(0).toUpperCase()+dateFormatted.slice(1)+" — "+dayLabel));
+      g.groups[dateStr].forEach(function(t){grpEl.appendChild(makeTlRow(t,false,isSoonGroup));});
+      tlWrap.appendChild(grpEl);
+    });
+  }
+
+  if(thisWeekTasks.length>0){
+    tlWrap.appendChild(el("div","timeline-title","Denna vecka"));
+    renderTlGroup(thisWeekTasks,true);
+  }
+  if(laterTasks.length>0){
+    tlWrap.appendChild(el("div","timeline-title","Kommande"));
+    renderTlGroup(laterTasks,false);
+  }
+
+  wrap.appendChild(tlWrap);
+}
+
 function addTaskBelow(refId){
   var ref=T.find(function(x){return x.id===refId;});if(!ref)return;
-  var newTask={id:nid(),text:"",proj:ref.proj,cat:ref.cat,status:"todo",comment:"",done:false,arch:false,doneAt:null,exp:false,edit:true,subs:[]};
+  var newTask={id:nid(),text:"",proj:ref.proj,cat:ref.cat,status:"todo",comment:"",done:false,arch:false,doneAt:null,exp:false,edit:true,subs:[],deadline:null,prio:false};
   var idx=T.indexOf(ref);
   T.splice(idx+1,0,newTask);
   save();renderTasks();
@@ -664,7 +1005,20 @@ function renderArch(){
   });
 }
 
-function render(){renderTabs();renderSel();renderTasks();renderArch();}
+var mainView="tasks"; // "tasks" or "cal"
+function setMainView(v){
+  mainView=v;
+  document.getElementById("navTasks").classList.toggle("active",v==="tasks");
+  document.getElementById("navCal").classList.toggle("active",v==="cal");
+  render();
+}
+function render(){
+  var isCal=mainView==="cal";
+  document.getElementById("taskSection").style.display=isCal?"none":"";
+  document.getElementById("calView").style.display=isCal?"":"none";
+  if(!isCal){renderTabs();renderSel();renderPrio();renderTasks();renderArch();}
+  else{renderCal();}
+}
 function toggleDone(id){
   var t=T.find(function(x){return x.id===id;});if(!t)return;
   t.done=!t.done;
@@ -682,7 +1036,7 @@ function addTask(){
   var text=document.getElementById("newTask").value.trim();if(!text)return;
   var pid=document.getElementById("taskProj").value||(P[0]&&P[0].id)||"";
   var cid=document.getElementById("taskCat").value||null;
-  T.unshift({id:nid(),text:text,proj:pid,cat:cid,status:"todo",comment:"",done:false,arch:false,doneAt:null,exp:false,edit:false,subs:[]});
+  T.unshift({id:nid(),text:text,proj:pid,cat:cid,status:"todo",comment:"",done:false,arch:false,doneAt:null,exp:false,edit:false,subs:[],deadline:null,prio:false});
   document.getElementById("newTask").value="";save();render();
   if(ap!=="all"&&ap!==pid)setProj(pid);
 }
@@ -749,10 +1103,11 @@ document.getElementById("addCatBtn").onclick=function(){
 // Override render to also update panel
 var _origRender=render;
 render=function(){_origRender();
+  var isCal=mainView==="cal";
   var toggleBtn=document.getElementById("toggleCatPanel");
-  if(toggleBtn)toggleBtn.style.display=ap==="all"?"none":"inline-flex";
+  if(toggleBtn)toggleBtn.style.display=(ap==="all"||isCal)?"none":"inline-flex";
   var panel=document.getElementById("catPanel");
-  if(panel&&catPanelOpen)renderCatPanel();
+  if(panel&&catPanelOpen&&!isCal)renderCatPanel();
 };
 
 load();render();
