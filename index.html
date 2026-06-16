@@ -176,6 +176,25 @@ body{font-family:"EB Garamond",Georgia,serif;background:#EDECEA;min-height:100vh
 .tl-days{font-size:11px;color:var(--sage);flex-shrink:0;font-style:italic}
 .tl-days.overdue{color:#c0392b;font-style:normal;font-weight:600}
 .tl-days.soon{color:#8B5E00;font-weight:600;font-style:normal}
+
+/* --- KANBAN --- */
+.kanban-wrap{display:flex;gap:10px;overflow-x:auto;padding-bottom:8px;align-items:flex-start}
+.kanban-col{flex:0 0 220px;background:var(--w);border:1px solid var(--sand);border-radius:var(--r);display:flex;flex-direction:column;max-height:calc(100vh - 220px)}
+.kanban-col-header{padding:10px 12px 8px;border-bottom:1px solid var(--sand);display:flex;align-items:center;gap:7px;flex-shrink:0}
+.kanban-col-title{font-size:12px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;flex:1}
+.kanban-col-count{font-size:11px;color:var(--sage);font-weight:400}
+.kanban-col-body{padding:8px;display:flex;flex-direction:column;gap:5px;overflow-y:auto;flex:1;min-height:60px}
+.kanban-col-body.drag-over-col{background:rgba(168,181,162,0.08);border-radius:var(--r)}
+.kanban-card{background:white;border:1px solid var(--sand);border-radius:var(--r);padding:9px 10px;cursor:grab;user-select:none;transition:opacity 0.15s,box-shadow 0.15s}
+.kanban-card:hover{border-color:var(--sage);box-shadow:0 1px 4px rgba(62,71,86,0.08)}
+.kanban-card.dragging{opacity:0.35;cursor:grabbing}
+.kanban-card.deadline-soon{border-left:3px solid #EF9F27;background:#FFFBF5}
+.kanban-card.deadline-overdue{border-left:3px solid #c0392b;background:#FFF5F5}
+.kanban-card-text{font-size:13px;color:var(--s);line-height:1.35;margin-bottom:5px}
+.kanban-card-meta{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.kanban-badge{font-size:10px;padding:1px 6px;border-radius:8px;font-family:"EB Garamond",Georgia,serif}
+.kanban-dl{font-size:10px;font-family:"EB Garamond",Georgia,serif;font-weight:500}
+.kanban-prio{font-size:11px;line-height:1}
 </style>
 </head>
 <body>
@@ -189,6 +208,7 @@ body{font-family:"EB Garamond",Georgia,serif;background:#EDECEA;min-height:100vh
   </div>
   <div class="main-nav" id="mainNav">
     <button class="main-nav-btn active" id="navTasks">Uppgifter</button>
+    <button class="main-nav-btn" id="navKanban">Status</button>
     <button class="main-nav-btn" id="navCal">Kalender</button>
   </div>
   <div id="taskSection">
@@ -202,6 +222,7 @@ body{font-family:"EB Garamond",Georgia,serif;background:#EDECEA;min-height:100vh
   </div>
   <div id="taskList"></div>
   </div><!-- end taskSection -->
+  <div id="kanbanView" style="display:none"></div>
   <div id="calView" style="display:none" class="cal-wrap"></div>
   <div id="emptyMsg" class="empty" style="display:none">Inga aktiva uppgifter i denna vy.</div>
   <div id="catPanel" style="display:none;margin-top:0.75rem;background:white;border:1px solid var(--sand);border-radius:var(--r);padding:12px 14px">
@@ -240,8 +261,6 @@ var PAL=[
 var ST=[
   {key:"todo",    label:"Att göra",   bg:"#ECEEF1",tx:"#2A3140",bo:"#3E4756"},
   {key:"progress",label:"Pågående",   bg:"#FDF0EB",tx:"#8B3A1C",bo:"#DE6032"},
-  {key:"review",  label:"Granskning", bg:"#F5F0EA",tx:"#7A6550",bo:"#C4A882"},
-  {key:"blocked", label:"Blockerad",  bg:"#FCEBEB",tx:"#791F1F",bo:"#F09595"},
   {key:"done",    label:"Klar",       bg:"#F0F3EF",tx:"#5A6B56",bo:"#A8B5A2"}
 ];
 function sm(k){return ST.find(function(s){return s.key===k;})||ST[0];}
@@ -321,6 +340,7 @@ document.getElementById("archBtn").onclick=function(){
 };
 
 document.getElementById("navTasks").onclick=function(){setMainView("tasks");};
+document.getElementById("navKanban").onclick=function(){setMainView("kanban");};
 document.getElementById("navCal").onclick=function(){setMainView("cal");};
 
 function setProj(id){if(openPop){openPop=null;renderTabs();return;}ap=id;render();}
@@ -901,6 +921,71 @@ function renderCal(){
   wrap.appendChild(tlWrap);
 }
 
+
+var kanbanDragId=null;
+
+function renderKanban(){
+  var wrap=document.getElementById("kanbanView");wrap.innerHTML="";
+  var board=el("div","kanban-wrap");
+  var today=new Date();today.setHours(0,0,0,0);
+  var eow=new Date(today);var dow=today.getDay();eow.setDate(today.getDate()+(dow===0?0:7-dow));
+
+  ST.forEach(function(st){
+    var col=el("div","kanban-col");
+    // Header
+    var hdr=el("div","kanban-col-header");
+    var dot=el("span");dot.style.cssText="width:9px;height:9px;border-radius:50%;background:"+st.bo+";flex-shrink:0;display:inline-block";
+    hdr.appendChild(dot);
+    var tasks=T.filter(function(t){return !t.arch&&t.status===st.key;});
+    hdr.appendChild(el("span","kanban-col-title",st.label));
+    hdr.appendChild(el("span","kanban-col-count",tasks.length||""));
+    col.appendChild(hdr);
+    // Body
+    var body=el("div","kanban-col-body");
+    body.dataset.status=st.key;
+    body.ondragover=function(e){e.preventDefault();body.classList.add("drag-over-col");};
+    body.ondragleave=function(){body.classList.remove("drag-over-col");};
+    body.ondrop=function(e){
+      e.preventDefault();body.classList.remove("drag-over-col");
+      if(!kanbanDragId)return;
+      var tx=T.find(function(x){return x.id===kanbanDragId;});
+      if(tx&&tx.status!==st.key){
+        tx.status=st.key;
+        if(st.key==="done"){tx.done=true;tx.doneAt=new Date().toISOString().slice(0,10);scheduleArchive(kanbanDragId);}
+        else{tx.done=false;tx.doneAt=null;tx.arch=false;}
+        save();renderKanban();
+      }
+      kanbanDragId=null;
+    };
+    tasks.forEach(function(t){
+      var dl=t.deadline?new Date(t.deadline):null;
+      var isOvd=dl&&dl<today,isSn=dl&&!isOvd&&dl<=eow;
+      var cardCls="kanban-card"+(isOvd?" deadline-overdue":isSn?" deadline-soon":"");
+      var card=el("div",cardCls);
+      card.draggable=true;
+      card.ondragstart=function(e){kanbanDragId=t.id;card.classList.add("dragging");e.dataTransfer.effectAllowed="move";};
+      card.ondragend=function(){card.classList.remove("dragging");kanbanDragId=null;};
+      card.appendChild(el("div","kanban-card-text",t.text));
+      var meta=el("div","kanban-card-meta");
+      var proj=P.find(function(p){return p.id===t.proj;});
+      if(proj){var c=cf(t.proj);var bdg=el("span","kanban-badge",proj.name);bdg.style.background=c.bg;bdg.style.color=c.tx;bdg.style.border="1px solid "+c.bo;meta.appendChild(bdg);}
+      if(t.deadline){
+        var dlSpan=el("span","kanban-dl"+(isOvd?" deadline-btn overdue":isSn?" deadline-btn soon":" deadline-btn has-date"),"📅 "+fd(t.deadline));
+        meta.appendChild(dlSpan);
+      }
+      if(t.prio)meta.appendChild(el("span","kanban-prio","⭐"));
+      card.appendChild(meta);
+      // Click to jump to task in list
+      card.onclick=function(){ap=t.proj;var tx2=T.find(function(x){return x.id===t.id;});if(tx2)tx2.exp=true;setMainView("tasks");setTimeout(function(){var el=document.getElementById("tc_"+t.id);if(el)el.scrollIntoView({behavior:"smooth",block:"center"});},150);};
+      body.appendChild(card);
+    });
+    if(tasks.length===0){var emp=el("div","empty","Inga uppgifter");emp.style.padding="12px 0";body.appendChild(emp);}
+    col.appendChild(body);
+    board.appendChild(col);
+  });
+  wrap.appendChild(board);
+}
+
 function addTaskBelow(refId){
   var ref=T.find(function(x){return x.id===refId;});if(!ref)return;
   var newTask={id:nid(),text:"",proj:ref.proj,cat:ref.cat,status:"todo",comment:"",done:false,arch:false,doneAt:null,exp:false,edit:true,subs:[],deadline:null,prio:false};
@@ -986,6 +1071,11 @@ function renderTasks(){
   document.getElementById("addCatBtn").style.display=ap==="all"?"none":"inline-flex";
 }
 
+function unarchive(id){
+  var t=T.find(function(x){return x.id===id;});if(!t)return;
+  t.arch=false;t.done=false;t.doneAt=null;t.status="todo";
+  save();render();
+}
 function renderArch(){
   var arch=T.filter(function(t){return t.arch&&(ap==="all"||t.proj===ap);});
   document.getElementById("archLabel").textContent="Arkiv ("+arch.length+")";
@@ -993,44 +1083,73 @@ function renderArch(){
   if(!archOpen){wrap.style.display="none";return;}
   wrap.style.display="flex";wrap.innerHTML="";
   if(!arch.length){wrap.appendChild(el("p","empty","Inga arkiverade uppgifter."));return;}
+  // Clear archive button
+  var clearRow=el("div");clearRow.style.cssText="display:flex;justify-content:flex-end;margin-bottom:6px;";
+  var clearBtn=el("button","btn muted","Rensa arkiv");clearBtn.style.cssText="font-size:11px;padding:3px 10px;color:#c0392b;border-color:#F09595;";
+  clearBtn.onclick=function(){
+    if(!confirm("Vill du permanent ta bort alla "+arch.length+" arkiverade uppgifter?"))return;
+    var archIds=arch.map(function(t){return t.id;});
+    T=T.filter(function(t){return archIds.indexOf(t.id)===-1;});
+    save();render();
+  };
+  clearRow.appendChild(clearBtn);wrap.appendChild(clearRow);
   arch.forEach(function(t){
     var c=cf(t.proj),proj=P.find(function(pr){return pr.id===t.proj;});
     var card=el("div","arch-card");
     card.appendChild(el("span","arch-text",t.text));
     if(proj){var b=el("span","badge",proj.name);b.style.background=c.bg;b.style.color=c.tx;b.style.border="1px solid "+c.bo;card.appendChild(b);}
     if(t.doneAt)card.appendChild(el("span","tdate",fd(t.doneAt)));
-    var db=el("button","icon-btn","×");db.style.marginLeft="auto";
+    // Undo button
+    var ub=el("button","btn muted","↩ Ångra");ub.style.cssText="font-size:11px;padding:2px 8px;margin-left:auto;";
+    ub.onclick=(function(id){return function(){unarchive(id);};})(t.id);
+    card.appendChild(ub);
+    // Delete button
+    var db=el("button","icon-btn","×");
     db.onclick=(function(id){return function(){T=T.filter(function(x){return x.id!==id;});save();render();};})(t.id);
     card.appendChild(db);wrap.appendChild(card);
   });
 }
 
-var mainView="tasks"; // "tasks" or "cal"
+var mainView="tasks"; // "tasks", "kanban" or "cal"
 function setMainView(v){
   mainView=v;
   document.getElementById("navTasks").classList.toggle("active",v==="tasks");
+  document.getElementById("navKanban").classList.toggle("active",v==="kanban");
   document.getElementById("navCal").classList.toggle("active",v==="cal");
   render();
 }
 function render(){
-  var isCal=mainView==="cal";
-  document.getElementById("taskSection").style.display=isCal?"none":"";
+  var isCal=mainView==="cal",isKanban=mainView==="kanban";
+  document.getElementById("taskSection").style.display=(isCal||isKanban)?"none":"";
   document.getElementById("calView").style.display=isCal?"":"none";
-  if(!isCal){renderTabs();renderSel();renderPrio();renderTasks();renderArch();}
-  else{renderCal();}
+  document.getElementById("kanbanView").style.display=isKanban?"":"none";
+  if(isCal){renderCal();}
+  else if(isKanban){renderKanban();}
+  else{renderTabs();renderSel();renderPrio();renderTasks();renderArch();}
+}
+function endOfWeekMs(){var now=new Date();now.setHours(23,59,59,999);var d=now.getDay();var daysToSun=d===0?0:7-d;now.setDate(now.getDate()+daysToSun);return now.getTime();}
+function scheduleArchive(id){
+  var t=T.find(function(x){return x.id===id;});if(!t||!t.done)return;
+  var delay=endOfWeekMs()-Date.now();
+  setTimeout(function(){var tx=T.find(function(x){return x.id===id;});if(tx&&tx.done){tx.arch=true;save();render();}},Math.max(delay,500));
+}
+function markDone(t){
+  t.done=true;t.status="done";t.doneAt=new Date().toISOString().slice(0,10);
+  scheduleArchive(t.id);
+}
+function markUndone(t){
+  t.done=false;t.arch=false;t.doneAt=null;t.status="todo";
 }
 function toggleDone(id){
   var t=T.find(function(x){return x.id===id;});if(!t)return;
-  t.done=!t.done;
-  if(t.done){t.status="done";t.doneAt=new Date().toISOString().slice(0,10);setTimeout(function(){t.arch=true;save();render();},1400);}
-  else{t.arch=false;t.doneAt=null;t.status="todo";}
+  if(t.done)markUndone(t);else markDone(t);
   save();render();
 }
 function setStatus(id,val){
   var t=T.find(function(x){return x.id===id;});if(!t)return;
-  t.status=val;
-  if(val==="done"){t.done=true;t.doneAt=new Date().toISOString().slice(0,10);setTimeout(function(){t.arch=true;save();render();},1400);}
-  save();renderTasks();
+  if(val==="done"){markDone(t);}
+  else{markUndone(t);t.status=val;}
+  save();render();
 }
 function addTask(){
   var text=document.getElementById("newTask").value.trim();if(!text)return;
