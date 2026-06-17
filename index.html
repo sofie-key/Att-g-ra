@@ -284,6 +284,7 @@ var T=[
   {id:"t3",text:"Skriva nyhetsbrev",proj:"p2",cat:"c3",status:"todo",comment:"",done:false,arch:false,doneAt:null,exp:false,edit:false,subs:[]},
   {id:"t4",text:"Boka konferensrum",proj:"p3",cat:null,status:"done",comment:"",done:true,arch:true,doneAt:"2025-06-14",exp:false,edit:false,subs:[]}
 ];
+var userId=new URLSearchParams(window.location.search).get("user")||"default";
 var ap="all",archOpen=false,openPop=null,editCat=null;
 var dragTask=null,dragCat=null,dragProj=null;
 
