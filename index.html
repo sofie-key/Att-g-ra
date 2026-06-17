@@ -290,25 +290,25 @@ var dragTask=null,dragCat=null,dragProj=null;
 var dbReady=false;
 var saveTimer=null;
 function save(){
-  try{localStorage.setItem("km_p",JSON.stringify(P));localStorage.setItem("km_t",JSON.stringify(T));}catch(e){}
+  try{localStorage.setItem("km_p_"+userId,JSON.stringify(P));localStorage.setItem("km_t_"+userId,JSON.stringify(T));}catch(e){}
   if(!dbReady)return;
   clearTimeout(saveTimer);
   saveTimer=setTimeout(function(){
     var db=window._fbDb;if(!db)return;
     var setDoc=window._fbFirestore.setDoc,doc=window._fbFirestore.doc;
-    setDoc(doc(db,"attgora","data"),{projects:JSON.stringify(P),tasks:JSON.stringify(T)}).catch(function(e){console.error("Firebase save",e);});
+    setDoc(doc(db,"attgora",userId),{projects:JSON.stringify(P),tasks:JSON.stringify(T)}).catch(function(e){console.error("Firebase save",e);});
   },500);
 }
 function load(){
   try{
-    var p=localStorage.getItem("km_p"),t=localStorage.getItem("km_t");
+    var p=localStorage.getItem("km_p_"+userId),t=localStorage.getItem("km_t_"+userId);
     if(p)P=JSON.parse(p);
     if(t){T=JSON.parse(t);T.forEach(function(tx){if(!tx.subs)tx.subs=[];if(tx.deadline===undefined)tx.deadline=null;if(tx.prio===undefined)tx.prio=false;});}
   }catch(e){}
   var db=window._fbDb;
   if(!db){dbReady=true;return;}
   var getDoc=window._fbFirestore.getDoc,doc=window._fbFirestore.doc;
-  getDoc(doc(db,"attgora","data")).then(function(snap){
+  getDoc(doc(db,"attgora",userId)).then(function(snap){
     if(snap.exists()){
       var d=snap.data();
       if(d.projects)P=JSON.parse(d.projects);
