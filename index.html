@@ -1096,7 +1096,7 @@ function initSearch(){
       var proj=P.find(function(p){return p.id===t.proj;});
       var c=cf(t.proj);
       var card=document.createElement("div");card.className="search-result-card";
-      var hi=t.text.replace(new RegExp("("+q.replace(/[.*+?^${}()|[\]\]/g,"\$&")+")","gi"),'<span class="search-highlight">$1</span>');
+      var escaped=q.replace(/[-\/\\^$*+?.()|[\]{}]/g,"\\$&");var hi=t.text.replace(new RegExp("("+escaped+")","gi"),'<span class="search-highlight">$1</span>');
       var txt=document.createElement("div");txt.className="search-result-text";txt.innerHTML=hi;
       var meta=document.createElement("div");meta.className="search-result-meta";
       if(proj){var b=document.createElement("span");b.style.cssText="padding:1px 6px;border-radius:8px;background:"+c.bg+";color:"+c.tx+";border:1px solid "+c.bo;b.textContent=proj.name;meta.appendChild(b);}
