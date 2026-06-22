@@ -108,7 +108,16 @@ body{font-family:"EB Garamond",Georgia,serif;background:#EDECEA;min-height:100vh
 .swatch:hover{transform:scale(1.15)}
 .swatch.sel{border-color:var(--s)}
 
-.main-nav{display:flex;gap:0;margin-bottom:1.25rem;border-bottom:2px solid var(--sand)}
+.main-nav{display:flex;gap:0;margin-bottom:1.25rem;border-bottom:2px solid var(--sand);align-items:center}
+.main-nav-spacer{flex:1}
+.search-nav-btn{background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;padding:6px 12px;cursor:pointer;color:var(--sage);transition:color 0.15s;display:flex;align-items:center}
+.search-nav-btn:hover{color:var(--s)}
+.search-nav-btn.open{color:var(--s)}
+.search-overlay{display:none;position:absolute;top:0;left:0;right:0;z-index:100;background:var(--w);padding:10px 14px;border-bottom:1px solid var(--sand);border-radius:var(--r)}
+.search-overlay.visible{display:flex;align-items:center;gap:8px}
+.search-overlay-input{flex:1;padding:7px 10px;border:1px solid var(--sand);border-radius:var(--r);font-family:"EB Garamond",Georgia,serif;font-size:14px;color:var(--s);outline:none;background:white}
+.search-overlay-input:focus{border-color:var(--sage)}
+.search-overlay-close{background:none;border:none;font-size:18px;color:var(--sage);cursor:pointer;padding:0 4px;line-height:1}
 .main-nav-btn{background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;padding:6px 18px;font-family:"EB Garamond",Georgia,serif;font-size:14px;color:var(--sage);cursor:pointer;transition:all 0.15s;font-weight:500}
 .main-nav-btn:hover{color:var(--s)}
 .main-nav-btn.active{color:var(--s);border-bottom-color:var(--o)}
@@ -209,11 +218,6 @@ body{font-family:"EB Garamond",Georgia,serif;background:#EDECEA;min-height:100vh
 .login-loading{font-size:13px;color:#A8B5A2;margin-top:1rem;display:none}
 
 /* --- SEARCH --- */
-.search-wrap{position:relative;margin-bottom:1rem}
-.search-input{width:100%;padding:8px 12px 8px 34px;border:1px solid var(--sand);border-radius:var(--r);font-family:"EB Garamond",Georgia,serif;font-size:14px;color:var(--s);background:white;outline:none;transition:border-color 0.15s}
-.search-input:focus{border-color:var(--sage)}
-.search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--sage);font-size:14px;pointer-events:none}
-.search-clear{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--sage);cursor:pointer;font-size:16px;line-height:1;display:none}
 .search-results{margin-top:0.5rem}
 .search-result-card{background:white;border:1px solid var(--sand);border-radius:var(--r);padding:8px 12px;margin-bottom:4px;cursor:pointer;transition:border-color 0.15s}
 .search-result-card:hover{border-color:var(--sage)}
@@ -275,11 +279,24 @@ body{font-family:"EB Garamond",Georgia,serif;background:#EDECEA;min-height:100vh
     <button class="btn" id="newProjBtn">+ Nytt projekt</button>
   </div>
   <div class="main-nav" id="mainNav">
-    <button class="main-nav-btn" id="navDash">Översikt</button>
-    <button class="main-nav-btn active" id="navTasks">Uppgifter</button>
+    <button class="main-nav-btn active" id="navDash">Översikt</button>
+    <button class="main-nav-btn" id="navTasks">Uppgifter</button>
     <button class="main-nav-btn" id="navKanban">Status</button>
     <button class="main-nav-btn" id="navCal">Kalender</button>
+    <span class="main-nav-spacer"></span>
+    <button class="search-nav-btn" id="searchNavBtn" title="Sök">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="6.5" cy="6.5" r="4.5"/>
+        <line x1="10.5" y1="10.5" x2="14" y2="14"/>
+      </svg>
+    </button>
   </div>
+  <div id="searchOverlay" class="search-overlay" style="position:relative">
+    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:var(--sage);flex-shrink:0"><circle cx="6.5" cy="6.5" r="4.5"/><line x1="10.5" y1="10.5" x2="14" y2="14"/></svg>
+    <input class="search-overlay-input" id="searchInput" placeholder="Sök uppgifter…" autocomplete="off">
+    <button class="search-overlay-close" id="searchClear">×</button>
+  </div>
+  <div id="searchResults" style="display:none"></div>
   <div id="taskSection">
   <div class="tabs" id="tabs"></div>
   <div id="prioSection" class="prio-section" style="display:none"><div class="prio-section-title">⭐ Prioriterade</div><div id="prioList"></div></div>
@@ -289,12 +306,6 @@ body{font-family:"EB Garamond",Georgia,serif;background:#EDECEA;min-height:100vh
     <select id="taskCat"></select>
     <button class="btn" id="addTaskBtn">+ Lägg till</button>
   </div>
-  <div class="search-wrap" id="searchWrap" style="display:none">
-    <span class="search-icon">🔍</span>
-    <input class="search-input" id="searchInput" placeholder="Sök uppgifter…" autocomplete="off">
-    <button class="search-clear" id="searchClear">×</button>
-  </div>
-  <div id="searchResults" style="display:none"></div>
   <div id="taskList"></div>
   </div><!-- end taskSection -->
   <div id="dashView" style="display:none"></div>
@@ -1079,24 +1090,28 @@ function renderKanban(){
 
 // ── SEARCH ───────────────────────────────────────────────────────────────────
 function initSearch(){
+  var btn=document.getElementById("searchNavBtn");
+  var overlay=document.getElementById("searchOverlay");
   var inp=document.getElementById("searchInput");
   var clr=document.getElementById("searchClear");
   var res=document.getElementById("searchResults");
-  if(!inp)return;
+  if(!btn||!inp)return;
+  function openSearch(){overlay.style.display="flex";btn.classList.add("open");inp.focus();}
+  function closeSearch(){overlay.style.display="none";btn.classList.remove("open");inp.value="";res.style.display="none";}
+  btn.onclick=function(){overlay.style.display==="none"?openSearch():closeSearch();};
+  clr.onclick=closeSearch;
   inp.oninput=function(){
     var q=inp.value.trim().toLowerCase();
-    clr.style.display=q?"":"none";
-    if(!q){res.style.display="none";document.getElementById("taskList").style.display="";return;}
-    document.getElementById("taskList").style.display="none";
-    res.style.display="";
-    res.innerHTML="";
+    if(!q){res.style.display="none";return;}
+    res.style.display="";res.innerHTML="";
     var hits=T.filter(function(t){return !t.arch&&t.text.toLowerCase().indexOf(q)!==-1;});
     if(!hits.length){res.innerHTML='<div class="search-empty">Inga uppgifter matchar sökningen.</div>';return;}
     hits.forEach(function(t){
       var proj=P.find(function(p){return p.id===t.proj;});
       var c=cf(t.proj);
       var card=document.createElement("div");card.className="search-result-card";
-      var escaped=q.replace(/[-\/\\^$*+?.()|[\]{}]/g,"\\$&");var hi=t.text.replace(new RegExp("("+escaped+")","gi"),'<span class="search-highlight">$1</span>');
+      var escaped=q.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+      var hi=t.text.replace(new RegExp("("+escaped+")","gi"),'<span class="search-highlight">$1</span>');
       var txt=document.createElement("div");txt.className="search-result-text";txt.innerHTML=hi;
       var meta=document.createElement("div");meta.className="search-result-meta";
       if(proj){var b=document.createElement("span");b.style.cssText="padding:1px 6px;border-radius:8px;background:"+c.bg+";color:"+c.tx+";border:1px solid "+c.bo;b.textContent=proj.name;meta.appendChild(b);}
@@ -1104,11 +1119,11 @@ function initSearch(){
       if(st){var sb=document.createElement("span");sb.textContent=st.label;meta.appendChild(sb);}
       if(t.deadline){var dl=document.createElement("span");dl.textContent="📅 "+fd(t.deadline);meta.appendChild(dl);}
       card.appendChild(txt);card.appendChild(meta);
-      card.onclick=function(){ap=t.proj;t.exp=true;inp.value="";clr.style.display="none";res.style.display="none";document.getElementById("taskList").style.display="";setMainView("tasks");setTimeout(function(){var el=document.getElementById("tc_"+t.id);if(el)el.scrollIntoView({behavior:"smooth",block:"center"});},150);};
+      card.onclick=function(){closeSearch();ap=t.proj;t.exp=true;setMainView("tasks");setTimeout(function(){var el=document.getElementById("tc_"+t.id);if(el)el.scrollIntoView({behavior:"smooth",block:"center"});},150);};
       res.appendChild(card);
     });
   };
-  clr.onclick=function(){inp.value="";clr.style.display="none";res.style.display="none";document.getElementById("taskList").style.display="";};
+  inp.onkeydown=function(e){if(e.key==="Escape")closeSearch();};
 }
 
 // ── DASHBOARD ────────────────────────────────────────────────────────────────
@@ -1124,55 +1139,37 @@ function renderDash(){
   var dash=document.createElement("div");dash.className="dash-wrap";
 
   // Stats row
-  var statsRow=document.createElement("div");statsRow.className="dash-row";
+  var statsRow=document.createElement("div");statsRow.className="dash-row";statsRow.style.gridTemplateColumns="repeat(4,1fr)";
   function statCard(num,label){
-    var c=document.createElement("div");c.className="dash-card";
+    var c=document.createElement("div");c.className="dash-card";c.style.textAlign="center";
     var s=document.createElement("div");s.className="dash-stat";s.textContent=num;
     var l=document.createElement("div");l.className="dash-stat-label";l.textContent=label;
     c.appendChild(s);c.appendChild(l);return c;
   }
-  statsRow.appendChild(statCard(active.length,"aktiva uppgifter"));
-  statsRow.appendChild(statCard(prio.length,"prioriterade"));
-  statsRow.appendChild(statCard(overdue.length,"förfallna"));
+  statsRow.appendChild(statCard(active.length,"Aktiva uppgifter"));
+  statsRow.appendChild(statCard(prio.length,"Prioriterade"));
+  statsRow.appendChild(statCard(soon.length,"Förfaller denna vecka"));
+  statsRow.appendChild(statCard(overdue.length,"Förfallna"));
   dash.appendChild(statsRow);
 
-  // Progress per project
-  if(P.length>0){
-    var progCard=document.createElement("div");progCard.className="dash-card";
-    var progTitle=document.createElement("div");progTitle.className="dash-section-title";progTitle.textContent="Framsteg per projekt";
-    progCard.appendChild(progTitle);
-    P.forEach(function(proj){
-      var total=T.filter(function(t){return t.proj===proj.id&&!t.arch;});
-      var doneP=total.filter(function(t){return t.done;});
-      if(!total.length)return;
-      var pct=Math.round(doneP.length/total.length*100);
-      var c=cf(proj.id);
-      var row=document.createElement("div");row.className="dash-progress-wrap";
-      var lbl=document.createElement("div");lbl.className="dash-progress-label";
-      var nl=document.createElement("span");nl.textContent=proj.name;nl.style.color=c.tx;
-      var nr=document.createElement("span");nr.textContent=doneP.length+"/"+total.length;
-      lbl.appendChild(nl);lbl.appendChild(nr);
-      var bar=document.createElement("div");bar.className="dash-progress-bar";
-      var fill=document.createElement("div");fill.className="dash-progress-fill";fill.style.width=pct+"%";fill.style.background=c.sw;
-      bar.appendChild(fill);row.appendChild(lbl);row.appendChild(bar);
-      progCard.appendChild(row);
-    });
-    dash.appendChild(progCard);
-  }
-
   // Overdue + Soon deadlines
+  function dashTaskRow(task,cls,metaText){
+    var proj=P.find(function(p){return p.id===task.proj;});
+    var row=document.createElement("div");row.className="dash-task-row "+(cls||"");
+    var cb=document.createElement("input");cb.type="checkbox";cb.checked=!!task.done;cb.style.flexShrink="0";
+    cb.onchange=(function(id){return function(e){e.stopPropagation();toggleDone(id);setTimeout(function(){renderDash();},100);};})(task.id);
+    var txt=document.createElement("span");txt.className="dash-task-text";txt.textContent=task.text;if(task.done)txt.style.textDecoration="line-through";
+    var meta=document.createElement("span");meta.className="dash-task-meta";meta.textContent=metaText||(proj?proj.name:"");
+    row.appendChild(cb);row.appendChild(txt);row.appendChild(meta);
+    return row;
+  }
   function deadlineSection(title,tasks,cls){
     if(!tasks.length)return;
     var card=document.createElement("div");card.className="dash-card";
     var t=document.createElement("div");t.className="dash-section-title";t.textContent=title;card.appendChild(t);
     tasks.slice(0,6).forEach(function(task){
       var proj=P.find(function(p){return p.id===task.proj;});
-      var row=document.createElement("div");row.className="dash-task-row "+cls;
-      var txt=document.createElement("span");txt.className="dash-task-text";txt.textContent=task.text;
-      var meta=document.createElement("span");meta.className="dash-task-meta";meta.textContent=fd(task.deadline)+(proj?" · "+proj.name:"");
-      row.appendChild(txt);row.appendChild(meta);
-      row.onclick=function(){ap=task.proj;task.exp=true;setMainView("tasks");setTimeout(function(){var el=document.getElementById("tc_"+task.id);if(el)el.scrollIntoView({behavior:"smooth",block:"center"});},150);};
-      card.appendChild(row);
+      card.appendChild(dashTaskRow(task,cls,fd(task.deadline)+(proj?" · "+proj.name:"")));
     });
     dash.appendChild(card);
   }
@@ -1185,12 +1182,7 @@ function renderDash(){
     var pt=document.createElement("div");pt.className="dash-section-title";pt.textContent="⭐ Prioriterade uppgifter";prioCard.appendChild(pt);
     prio.slice(0,6).forEach(function(task){
       var proj=P.find(function(p){return p.id===task.proj;});
-      var row=document.createElement("div");row.className="dash-task-row";
-      var txt=document.createElement("span");txt.className="dash-task-text";txt.textContent=task.text;
-      var meta=document.createElement("span");meta.className="dash-task-meta";meta.textContent=proj?proj.name:"";
-      row.appendChild(txt);row.appendChild(meta);
-      row.onclick=function(){ap=task.proj;task.exp=true;setMainView("tasks");setTimeout(function(){var el=document.getElementById("tc_"+task.id);if(el)el.scrollIntoView({behavior:"smooth",block:"center"});},150);};
-      prioCard.appendChild(row);
+      prioCard.appendChild(dashTaskRow(task,"",proj?proj.name:""));
     });
     dash.appendChild(prioCard);
   }
@@ -1346,7 +1338,7 @@ function renderArch(){
   });
 }
 
-var mainView="tasks";
+var mainView="dash";
 function setMainView(v){
   mainView=v;
   document.getElementById("navDash").classList.toggle("active",v==="dash");
@@ -1362,7 +1354,7 @@ function render(){
   document.getElementById("calView").style.display=isCal?"":"none";
   document.getElementById("kanbanView").style.display=isKanban?"":"none";
   document.getElementById("dashView").style.display=isDash?"":"none";
-  var sw=document.getElementById("searchWrap");if(sw)sw.style.display=isOther?"none":"";
+
   if(isCal){renderCal();}
   else if(isKanban){renderKanban();}
   else if(isDash){renderDash();}
