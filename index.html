@@ -195,10 +195,39 @@ body{font-family:"EB Garamond",Georgia,serif;background:#EDECEA;min-height:100vh
 .kanban-badge{font-size:10px;padding:1px 6px;border-radius:8px;font-family:"EB Garamond",Georgia,serif}
 .kanban-dl{font-size:10px;font-family:"EB Garamond",Georgia,serif;font-weight:500}
 .kanban-prio{font-size:11px;line-height:1}
+
+/* --- LOGIN SCREEN --- */
+#loginScreen{position:fixed;inset:0;background:#EDECEA;display:flex;align-items:center;justify-content:center;z-index:9999;font-family:"EB Garamond",Georgia,serif}
+.login-box{background:#F8F6F2;border:0.5px solid #D9C8B6;border-radius:10px;padding:2.5rem 2.5rem 2rem;max-width:380px;width:90%;text-align:center;box-shadow:0 4px 24px rgba(62,71,86,0.08)}
+.login-logo{width:56px;height:56px;margin:0 auto 1.2rem}
+.login-title{font-size:22px;font-weight:600;color:#3E4756;margin-bottom:0.3rem}
+.login-sub{font-size:14px;color:#A8B5A2;margin-bottom:1.8rem}
+.login-btn{display:inline-flex;align-items:center;gap:10px;padding:10px 22px;border:1px solid #D9C8B6;border-radius:6px;background:white;font-size:14px;font-family:"EB Garamond",Georgia,serif;color:#3E4756;cursor:pointer;transition:all 0.15s;width:100%;justify-content:center}
+.login-btn:hover{background:#3E4756;color:white;border-color:#3E4756}
+.login-btn:hover svg path{fill:white}
+.login-error{font-size:12px;color:#c0392b;margin-top:1rem;display:none}
+.login-loading{font-size:13px;color:#A8B5A2;margin-top:1rem;display:none}
 </style>
 </head>
 <body>
-<div class="app">
+<div id="loginScreen">
+  <div class="login-box">
+    <svg class="login-logo" viewBox="0 0 192 192" xmlns="http://www.w3.org/2000/svg">
+      <rect width="192" height="192" rx="42" fill="#2A3140"/>
+      <rect x="48" y="48" width="96" height="96" rx="14" fill="none" stroke="#DE6032" stroke-width="7"/>
+      <polyline points="66,96 86,116 126,72" fill="none" stroke="#DE6032" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div class="login-title">Att göra</div>
+    <div class="login-sub">Key Management</div>
+    <button class="login-btn" id="googleSignInBtn">
+      <svg width="18" height="18" viewBox="0 0 18 18"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/><path d="M3.964 10.706A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.038l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.962L3.964 6.294C4.672 4.169 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
+      Logga in med Google
+    </button>
+    <div class="login-error" id="loginError">Du måste använda en @keymanagement.se-adress för att logga in.</div>
+    <div class="login-loading" id="loginLoading">Loggar in...</div>
+  </div>
+</div>
+<div class="app" style="display:none">
   <div class="top-bar">
     <h1>
       <svg style="width:18px;height:18px;fill:none;stroke:#DE6032;stroke-width:2;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
@@ -284,14 +313,14 @@ var T=[
   {id:"t3",text:"Skriva nyhetsbrev",proj:"p2",cat:"c3",status:"todo",comment:"",done:false,arch:false,doneAt:null,exp:false,edit:false,subs:[]},
   {id:"t4",text:"Boka konferensrum",proj:"p3",cat:null,status:"done",comment:"",done:true,arch:true,doneAt:"2025-06-14",exp:false,edit:false,subs:[]}
 ];
-var userId=new URLSearchParams(window.location.search).get("user")||"default";
+var userId=null; // Set by Google Auth
 var ap="all",archOpen=false,openPop=null,editCat=null;
 var dragTask=null,dragCat=null,dragProj=null;
 
 var dbReady=false;
 var saveTimer=null;
 function save(){
-  try{localStorage.setItem("km_p_"+userId,JSON.stringify(P));localStorage.setItem("km_t_"+userId,JSON.stringify(T));}catch(e){}
+  try{if(userId){localStorage.setItem("km_p_"+userId,JSON.stringify(P));localStorage.setItem("km_t_"+userId,JSON.stringify(T));}}catch(e){}
   if(!dbReady)return;
   clearTimeout(saveTimer);
   saveTimer=setTimeout(function(){
@@ -1235,6 +1264,8 @@ load();render();
 <script type="module">
   import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import{getFirestore,doc,getDoc,setDoc}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import{getAuth,GoogleAuthProvider,signInWithPopup,onAuthStateChanged,signOut}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
   const firebaseConfig={
     apiKey:"AIzaSyA2P9vg7FxRrDUwUGxEtAGDhESyuGS_d4o",
     authDomain:"att-gora-c2b2d.firebaseapp.com",
@@ -1243,11 +1274,64 @@ load();render();
     messagingSenderId:"245813603630",
     appId:"1:245813603630:web:b8eecf98a0c5eef3785ebf"
   };
+
+  const ALLOWED_DOMAIN="keymanagement.se";
+
   const app=initializeApp(firebaseConfig);
-  window._fbDb=getFirestore(app);
+  const db=getFirestore(app);
+  const auth=getAuth(app);
+
+  window._fbDb=db;
   window._fbFirestore={doc,getDoc,setDoc};
-  // Re-run load now that Firebase is ready
-  load();
+
+  // Sign in button
+  document.getElementById("googleSignInBtn").onclick=async function(){
+    document.getElementById("loginLoading").style.display="block";
+    document.getElementById("loginError").style.display="none";
+    try{
+      const provider=new GoogleAuthProvider();
+      provider.setCustomParameters({hd:ALLOWED_DOMAIN});
+      await signInWithPopup(auth,provider);
+    }catch(e){
+      document.getElementById("loginLoading").style.display="none";
+      document.getElementById("loginError").style.display="block";
+      document.getElementById("loginError").textContent="Inloggning misslyckades. Försök igen.";
+    }
+  };
+
+  // Auth state listener
+  onAuthStateChanged(auth,function(user){
+    if(user){
+      // Check domain
+      const email=user.email||"";
+      if(!email.endsWith("@"+ALLOWED_DOMAIN)){
+        document.getElementById("loginError").style.display="block";
+        document.getElementById("loginLoading").style.display="none";
+        signOut(auth);
+        return;
+      }
+      // Logged in — set userId to uid, show app
+      userId=user.uid;
+      document.getElementById("loginScreen").style.display="none";
+      document.querySelector(".app").style.display="";
+      // Add logout button to top bar
+      if(!document.getElementById("logoutBtn")){
+        var lb=document.createElement("button");
+        lb.id="logoutBtn";lb.className="btn muted";
+        lb.style.fontSize="12px";
+        lb.textContent="Logga ut ("+email+")";
+        lb.onclick=function(){signOut(auth);};
+        document.querySelector(".top-bar").appendChild(lb);
+      }
+      load();
+    }else{
+      // Logged out — show login screen, hide app
+      userId=null;
+      document.getElementById("loginScreen").style.display="flex";
+      document.querySelector(".app").style.display="none";
+      document.getElementById("loginLoading").style.display="none";
+    }
+  });
 </script>
 </body>
 </html>
