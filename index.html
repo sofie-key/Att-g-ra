@@ -229,7 +229,8 @@ body{font-family:"EB Garamond",Georgia,serif;background:#EDECEA;min-height:100vh
 /* --- DASHBOARD --- */
 .dash-wrap{display:flex;flex-direction:column;gap:1rem}
 .dash-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.dash-card{background:white;border:1px solid var(--sand);border-radius:var(--r);padding:14px 16px}
+.dash-card{background:var(--w);border:1px solid var(--sand);border-radius:var(--r);padding:14px 16px}
+.dash-stat-card{background:transparent;border:none;border-radius:var(--r);padding:10px 16px;text-align:center}
 .dash-card-title{font-size:11px;font-weight:600;color:var(--sage);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:10px}
 .dash-stat{font-size:32px;font-weight:600;color:var(--o);font-family:"EB Garamond",Georgia,serif;line-height:1}
 .dash-stat-label{font-size:12px;color:var(--sage);margin-top:2px}
@@ -1139,9 +1140,10 @@ function renderDash(){
   var dash=document.createElement("div");dash.className="dash-wrap";
 
   // Stats row
-  var statsRow=document.createElement("div");statsRow.className="dash-row";statsRow.style.gridTemplateColumns="repeat(4,1fr)";
+  var statsWrap=document.createElement("div");statsWrap.className="dash-card";statsWrap.style.cssText="padding:10px 8px";
+  var statsRow=document.createElement("div");statsRow.className="dash-row";statsRow.style.gridTemplateColumns="repeat(4,1fr)";statsRow.style.borderBottom="none";
   function statCard(num,label){
-    var c=document.createElement("div");c.className="dash-card";c.style.textAlign="center";
+    var c=document.createElement("div");c.className="dash-stat-card";
     var s=document.createElement("div");s.className="dash-stat";s.textContent=num;
     var l=document.createElement("div");l.className="dash-stat-label";l.textContent=label;
     c.appendChild(s);c.appendChild(l);return c;
@@ -1150,17 +1152,23 @@ function renderDash(){
   statsRow.appendChild(statCard(prio.length,"Prioriterade"));
   statsRow.appendChild(statCard(soon.length,"Förfaller denna vecka"));
   statsRow.appendChild(statCard(overdue.length,"Förfallna"));
-  dash.appendChild(statsRow);
+  statsWrap.appendChild(statsRow);dash.appendChild(statsWrap);
 
   // Overdue + Soon deadlines
   function dashTaskRow(task,cls,metaText){
     var proj=P.find(function(p){return p.id===task.proj;});
-    var row=document.createElement("div");row.className="dash-task-row "+(cls||"");
-    var cb=document.createElement("input");cb.type="checkbox";cb.checked=!!task.done;cb.style.flexShrink="0";
+    var c=cf(task.proj);
+    var isOvd=cls==="overdue",isSn=cls==="soon";
+    var rowCls="tl-row"+(isOvd?" tl-row-overdue":isSn?" tl-row-soon":"");
+    var row=document.createElement("div");row.className=rowCls;
+    var cb=document.createElement("input");cb.type="checkbox";cb.checked=!!task.done;cb.style.cssText="flex-shrink:0;cursor:pointer";
     cb.onchange=(function(id){return function(e){e.stopPropagation();toggleDone(id);setTimeout(function(){renderDash();},100);};})(task.id);
-    var txt=document.createElement("span");txt.className="dash-task-text";txt.textContent=task.text;if(task.done)txt.style.textDecoration="line-through";
-    var meta=document.createElement("span");meta.className="dash-task-meta";meta.textContent=metaText||(proj?proj.name:"");
-    row.appendChild(cb);row.appendChild(txt);row.appendChild(meta);
+    var dot=el("span","tl-dot");dot.style.background=c.sw;
+    var txt=el("span","tl-text",task.text);if(task.done)txt.style.textDecoration="line-through";
+    row.appendChild(cb);row.appendChild(dot);row.appendChild(txt);
+    if(proj){var bdg=el("span","tl-badge",proj.name);bdg.style.background=c.bg;bdg.style.color=c.tx;bdg.style.border="1px solid "+c.bo;row.appendChild(bdg);}
+    if(metaText&&!proj){var mt=el("span","tl-badge",metaText);row.appendChild(mt);}
+    else if(task.deadline){var dl=el("span","dash-task-meta",fd(task.deadline));row.appendChild(dl);}
     return row;
   }
   function deadlineSection(title,tasks,cls){
