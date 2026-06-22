@@ -207,6 +207,45 @@ body{font-family:"EB Garamond",Georgia,serif;background:#EDECEA;min-height:100vh
 .login-btn:hover svg path{fill:white}
 .login-error{font-size:12px;color:#c0392b;margin-top:1rem;display:none}
 .login-loading{font-size:13px;color:#A8B5A2;margin-top:1rem;display:none}
+
+/* --- SEARCH --- */
+.search-wrap{position:relative;margin-bottom:1rem}
+.search-input{width:100%;padding:8px 12px 8px 34px;border:1px solid var(--sand);border-radius:var(--r);font-family:"EB Garamond",Georgia,serif;font-size:14px;color:var(--s);background:white;outline:none;transition:border-color 0.15s}
+.search-input:focus{border-color:var(--sage)}
+.search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--sage);font-size:14px;pointer-events:none}
+.search-clear{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--sage);cursor:pointer;font-size:16px;line-height:1;display:none}
+.search-results{margin-top:0.5rem}
+.search-result-card{background:white;border:1px solid var(--sand);border-radius:var(--r);padding:8px 12px;margin-bottom:4px;cursor:pointer;transition:border-color 0.15s}
+.search-result-card:hover{border-color:var(--sage)}
+.search-result-text{font-size:13px;color:var(--s);margin-bottom:3px}
+.search-result-meta{display:flex;gap:6px;align-items:center;font-size:11px;color:var(--sage)}
+.search-highlight{background:#FFF3CD;border-radius:2px;padding:0 1px}
+.search-empty{font-size:13px;color:var(--sage);text-align:center;padding:1rem 0;font-style:italic}
+
+/* --- DASHBOARD --- */
+.dash-wrap{display:flex;flex-direction:column;gap:1rem}
+.dash-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.dash-card{background:white;border:1px solid var(--sand);border-radius:var(--r);padding:14px 16px}
+.dash-card-title{font-size:11px;font-weight:600;color:var(--sage);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:10px}
+.dash-stat{font-size:32px;font-weight:600;color:var(--o);font-family:"EB Garamond",Georgia,serif;line-height:1}
+.dash-stat-label{font-size:12px;color:var(--sage);margin-top:2px}
+.dash-section-title{font-size:11px;font-weight:600;color:var(--sage);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--sand)}
+.dash-task-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--sand)}
+.dash-task-row:last-child{border-bottom:none}
+.dash-task-text{font-size:13px;color:var(--s);flex:1}
+.dash-task-meta{font-size:11px;color:var(--sage);flex-shrink:0}
+.dash-task-row.overdue .dash-task-text{color:#c0392b}
+.dash-task-row.soon .dash-task-text{color:#8B5E00}
+.dash-empty{font-size:12px;color:var(--sage);font-style:italic;padding:6px 0}
+.dash-progress-wrap{margin-top:6px}
+.dash-progress-bar{height:6px;background:var(--sand);border-radius:3px;overflow:hidden;margin-bottom:4px}
+.dash-progress-fill{height:100%;background:var(--o);border-radius:3px;transition:width 0.3s}
+.dash-progress-label{font-size:11px;color:var(--sage);display:flex;justify-content:space-between}
+
+/* --- RECURRING TASKS --- */
+.recur-wrap{display:flex;align-items:center;gap:6px;margin-top:4px}
+.recur-select{font-family:"EB Garamond",Georgia,serif;font-size:11px;border:1px solid var(--sand);border-radius:var(--r);padding:2px 5px;color:var(--s);background:white;outline:none;cursor:pointer}
+.recur-badge{font-size:10px;color:var(--sage);font-style:italic;display:flex;align-items:center;gap:3px}
 </style>
 </head>
 <body>
@@ -236,6 +275,7 @@ body{font-family:"EB Garamond",Georgia,serif;background:#EDECEA;min-height:100vh
     <button class="btn" id="newProjBtn">+ Nytt projekt</button>
   </div>
   <div class="main-nav" id="mainNav">
+    <button class="main-nav-btn" id="navDash">Översikt</button>
     <button class="main-nav-btn active" id="navTasks">Uppgifter</button>
     <button class="main-nav-btn" id="navKanban">Status</button>
     <button class="main-nav-btn" id="navCal">Kalender</button>
@@ -249,8 +289,15 @@ body{font-family:"EB Garamond",Georgia,serif;background:#EDECEA;min-height:100vh
     <select id="taskCat"></select>
     <button class="btn" id="addTaskBtn">+ Lägg till</button>
   </div>
+  <div class="search-wrap" id="searchWrap" style="display:none">
+    <span class="search-icon">🔍</span>
+    <input class="search-input" id="searchInput" placeholder="Sök uppgifter…" autocomplete="off">
+    <button class="search-clear" id="searchClear">×</button>
+  </div>
+  <div id="searchResults" style="display:none"></div>
   <div id="taskList"></div>
   </div><!-- end taskSection -->
+  <div id="dashView" style="display:none"></div>
   <div id="kanbanView" style="display:none"></div>
   <div id="calView" style="display:none" class="cal-wrap"></div>
   <div id="emptyMsg" class="empty" style="display:none">Inga aktiva uppgifter i denna vy.</div>
@@ -333,7 +380,7 @@ function load(){
   try{
     var p=localStorage.getItem("km_p_"+userId),t=localStorage.getItem("km_t_"+userId);
     if(p)P=JSON.parse(p);
-    if(t){T=JSON.parse(t);T.forEach(function(tx){if(!tx.subs)tx.subs=[];if(tx.deadline===undefined)tx.deadline=null;if(tx.prio===undefined)tx.prio=false;});}
+    if(t){T=JSON.parse(t);T.forEach(function(tx){if(!tx.subs)tx.subs=[];if(tx.deadline===undefined)tx.deadline=null;if(tx.prio===undefined)tx.prio=false;if(tx.recur===undefined)tx.recur=null;});}
   }catch(e){}
   var db=window._fbDb;
   if(!db){dbReady=true;return;}
@@ -342,7 +389,7 @@ function load(){
     if(snap.exists()){
       var d=snap.data();
       if(d.projects)P=JSON.parse(d.projects);
-      if(d.tasks){T=JSON.parse(d.tasks);T.forEach(function(tx){if(!tx.subs)tx.subs=[];if(tx.deadline===undefined)tx.deadline=null;if(tx.prio===undefined)tx.prio=false;});}
+      if(d.tasks){T=JSON.parse(d.tasks);T.forEach(function(tx){if(!tx.subs)tx.subs=[];if(tx.deadline===undefined)tx.deadline=null;if(tx.prio===undefined)tx.prio=false;if(tx.recur===undefined)tx.recur=null;});}
       render();
     }
     dbReady=true;
@@ -369,6 +416,7 @@ document.getElementById("archBtn").onclick=function(){
   renderArch();
 };
 
+document.getElementById("navDash").onclick=function(){setMainView("dash");};
 document.getElementById("navTasks").onclick=function(){setMainView("tasks");};
 document.getElementById("navKanban").onclick=function(){setMainView("kanban");};
 document.getElementById("navCal").onclick=function(){setMainView("cal");};
@@ -658,6 +706,7 @@ function makeCard(t){
     var tx=T.find(function(x){return x.id===id;});if(tx){tx.deadline=null;save();renderTasks();}
   };})(t.id);
   main.appendChild(dlBtn);
+  if(t.recur){var rb=el("span","recur-badge","🔁 "+({daily:"Dagligen",weekly:"Veckovis",monthly:"Månadsvis"}[t.recur]||""));main.appendChild(rb);}
 
   var expBtn=el("button","icon-btn",t.exp?"▴":"▾");
   expBtn.onclick=(function(id){return function(e){e.stopPropagation();var tx=T.find(function(x){return x.id===id;});if(tx){tx.exp=!tx.exp;save();renderTasks();}};})(t.id);
@@ -724,6 +773,17 @@ function makeCard(t){
       dr1b.appendChild(clrDl);
     }
     det.appendChild(dr1b);
+    // Recurring row
+    var drRec=el("div","drow");
+    drRec.appendChild(el("span","dlabel","Upprepning"));
+    var recurSel=document.createElement("select");recurSel.className="recur-select";
+    [{v:"",l:"Ingen"},{v:"daily",l:"Varje dag"},{v:"weekly",l:"Varje vecka"},{v:"monthly",l:"Varje månad"}].forEach(function(o){
+      var opt=document.createElement("option");opt.value=o.v;opt.textContent=o.l;if(t.recur===o.v)opt.selected=true;
+      recurSel.appendChild(opt);
+    });
+    recurSel.onchange=(function(id){return function(){var tx=T.find(function(x){return x.id===id;});if(tx){tx.recur=this.value||null;save();renderTasks();}};})(t.id);
+    drRec.appendChild(recurSel);
+    det.appendChild(drRec);
     var dr2=el("div","drow");
     dr2.appendChild(el("span","dlabel","Kommentar"));
     var ta=document.createElement("textarea");ta.className="comment-box";ta.placeholder="Anteckna mer om uppgiften…";ta.value=t.comment||"";
@@ -1016,9 +1076,155 @@ function renderKanban(){
   wrap.appendChild(board);
 }
 
+
+// ── SEARCH ───────────────────────────────────────────────────────────────────
+function initSearch(){
+  var inp=document.getElementById("searchInput");
+  var clr=document.getElementById("searchClear");
+  var res=document.getElementById("searchResults");
+  if(!inp)return;
+  inp.oninput=function(){
+    var q=inp.value.trim().toLowerCase();
+    clr.style.display=q?"":"none";
+    if(!q){res.style.display="none";document.getElementById("taskList").style.display="";return;}
+    document.getElementById("taskList").style.display="none";
+    res.style.display="";
+    res.innerHTML="";
+    var hits=T.filter(function(t){return !t.arch&&t.text.toLowerCase().indexOf(q)!==-1;});
+    if(!hits.length){res.innerHTML='<div class="search-empty">Inga uppgifter matchar sökningen.</div>';return;}
+    hits.forEach(function(t){
+      var proj=P.find(function(p){return p.id===t.proj;});
+      var c=cf(t.proj);
+      var card=document.createElement("div");card.className="search-result-card";
+      var hi=t.text.replace(new RegExp("("+q.replace(/[.*+?^${}()|[\]\]/g,"\$&")+")","gi"),'<span class="search-highlight">$1</span>');
+      var txt=document.createElement("div");txt.className="search-result-text";txt.innerHTML=hi;
+      var meta=document.createElement("div");meta.className="search-result-meta";
+      if(proj){var b=document.createElement("span");b.style.cssText="padding:1px 6px;border-radius:8px;background:"+c.bg+";color:"+c.tx+";border:1px solid "+c.bo;b.textContent=proj.name;meta.appendChild(b);}
+      var st=ST.find(function(s){return s.key===t.status;});
+      if(st){var sb=document.createElement("span");sb.textContent=st.label;meta.appendChild(sb);}
+      if(t.deadline){var dl=document.createElement("span");dl.textContent="📅 "+fd(t.deadline);meta.appendChild(dl);}
+      card.appendChild(txt);card.appendChild(meta);
+      card.onclick=function(){ap=t.proj;t.exp=true;inp.value="";clr.style.display="none";res.style.display="none";document.getElementById("taskList").style.display="";setMainView("tasks");setTimeout(function(){var el=document.getElementById("tc_"+t.id);if(el)el.scrollIntoView({behavior:"smooth",block:"center"});},150);};
+      res.appendChild(card);
+    });
+  };
+  clr.onclick=function(){inp.value="";clr.style.display="none";res.style.display="none";document.getElementById("taskList").style.display="";};
+}
+
+// ── DASHBOARD ────────────────────────────────────────────────────────────────
+function renderDash(){
+  var wrap=document.getElementById("dashView");wrap.innerHTML="";
+  var today=new Date();today.setHours(0,0,0,0);
+  var eow=new Date(today);var dow=today.getDay();eow.setDate(today.getDate()+(dow===0?0:7-dow));
+  var active=T.filter(function(t){return !t.arch&&!t.done;});
+  var done=T.filter(function(t){return t.done&&!t.arch;});
+  var prio=active.filter(function(t){return t.prio;});
+  var overdue=active.filter(function(t){return t.deadline&&new Date(t.deadline)<today;});
+  var soon=active.filter(function(t){return t.deadline&&new Date(t.deadline)>=today&&new Date(t.deadline)<=eow;});
+  var dash=document.createElement("div");dash.className="dash-wrap";
+
+  // Stats row
+  var statsRow=document.createElement("div");statsRow.className="dash-row";
+  function statCard(num,label){
+    var c=document.createElement("div");c.className="dash-card";
+    var s=document.createElement("div");s.className="dash-stat";s.textContent=num;
+    var l=document.createElement("div");l.className="dash-stat-label";l.textContent=label;
+    c.appendChild(s);c.appendChild(l);return c;
+  }
+  statsRow.appendChild(statCard(active.length,"aktiva uppgifter"));
+  statsRow.appendChild(statCard(prio.length,"prioriterade"));
+  statsRow.appendChild(statCard(overdue.length,"förfallna"));
+  dash.appendChild(statsRow);
+
+  // Progress per project
+  if(P.length>0){
+    var progCard=document.createElement("div");progCard.className="dash-card";
+    var progTitle=document.createElement("div");progTitle.className="dash-section-title";progTitle.textContent="Framsteg per projekt";
+    progCard.appendChild(progTitle);
+    P.forEach(function(proj){
+      var total=T.filter(function(t){return t.proj===proj.id&&!t.arch;});
+      var doneP=total.filter(function(t){return t.done;});
+      if(!total.length)return;
+      var pct=Math.round(doneP.length/total.length*100);
+      var c=cf(proj.id);
+      var row=document.createElement("div");row.className="dash-progress-wrap";
+      var lbl=document.createElement("div");lbl.className="dash-progress-label";
+      var nl=document.createElement("span");nl.textContent=proj.name;nl.style.color=c.tx;
+      var nr=document.createElement("span");nr.textContent=doneP.length+"/"+total.length;
+      lbl.appendChild(nl);lbl.appendChild(nr);
+      var bar=document.createElement("div");bar.className="dash-progress-bar";
+      var fill=document.createElement("div");fill.className="dash-progress-fill";fill.style.width=pct+"%";fill.style.background=c.sw;
+      bar.appendChild(fill);row.appendChild(lbl);row.appendChild(bar);
+      progCard.appendChild(row);
+    });
+    dash.appendChild(progCard);
+  }
+
+  // Overdue + Soon deadlines
+  function deadlineSection(title,tasks,cls){
+    if(!tasks.length)return;
+    var card=document.createElement("div");card.className="dash-card";
+    var t=document.createElement("div");t.className="dash-section-title";t.textContent=title;card.appendChild(t);
+    tasks.slice(0,6).forEach(function(task){
+      var proj=P.find(function(p){return p.id===task.proj;});
+      var row=document.createElement("div");row.className="dash-task-row "+cls;
+      var txt=document.createElement("span");txt.className="dash-task-text";txt.textContent=task.text;
+      var meta=document.createElement("span");meta.className="dash-task-meta";meta.textContent=fd(task.deadline)+(proj?" · "+proj.name:"");
+      row.appendChild(txt);row.appendChild(meta);
+      row.onclick=function(){ap=task.proj;task.exp=true;setMainView("tasks");setTimeout(function(){var el=document.getElementById("tc_"+task.id);if(el)el.scrollIntoView({behavior:"smooth",block:"center"});},150);};
+      card.appendChild(row);
+    });
+    dash.appendChild(card);
+  }
+  deadlineSection("🔴 Förfallna deadlines",overdue,"overdue");
+  deadlineSection("🟡 Förfaller denna vecka",soon,"soon");
+
+  // Prioritized
+  if(prio.length){
+    var prioCard=document.createElement("div");prioCard.className="dash-card";
+    var pt=document.createElement("div");pt.className="dash-section-title";pt.textContent="⭐ Prioriterade uppgifter";prioCard.appendChild(pt);
+    prio.slice(0,6).forEach(function(task){
+      var proj=P.find(function(p){return p.id===task.proj;});
+      var row=document.createElement("div");row.className="dash-task-row";
+      var txt=document.createElement("span");txt.className="dash-task-text";txt.textContent=task.text;
+      var meta=document.createElement("span");meta.className="dash-task-meta";meta.textContent=proj?proj.name:"";
+      row.appendChild(txt);row.appendChild(meta);
+      row.onclick=function(){ap=task.proj;task.exp=true;setMainView("tasks");setTimeout(function(){var el=document.getElementById("tc_"+task.id);if(el)el.scrollIntoView({behavior:"smooth",block:"center"});},150);};
+      prioCard.appendChild(row);
+    });
+    dash.appendChild(prioCard);
+  }
+
+  wrap.appendChild(dash);
+}
+
+// ── RECURRING TASKS ──────────────────────────────────────────────────────────
+function nextRecurDate(recur,fromDate){
+  var d=new Date(fromDate||new Date());d.setHours(0,0,0,0);
+  if(recur==="daily"){d.setDate(d.getDate()+1);}
+  else if(recur==="weekly"){d.setDate(d.getDate()+7);}
+  else if(recur==="monthly"){d.setMonth(d.getMonth()+1);}
+  return d.toISOString().slice(0,10);
+}
+function checkRecurring(){
+  var today=new Date().toISOString().slice(0,10);
+  var toAdd=[];
+  T.forEach(function(t){
+    if(!t.recur||!t.done||!t.doneAt)return;
+    // Check if a recurrence already exists after doneAt
+    var already=T.some(function(x){return x.id!==t.id&&x.text===t.text&&x.proj===t.proj&&x.recur===t.recur&&!x.arch;});
+    if(already)return;
+    var next=nextRecurDate(t.recur,t.doneAt);
+    if(next<=today){
+      toAdd.push({id:nid(),text:t.text,proj:t.proj,cat:t.cat,status:"todo",comment:"",done:false,arch:false,doneAt:null,exp:false,edit:false,subs:[],deadline:next,prio:false,recur:t.recur});
+    }
+  });
+  if(toAdd.length){toAdd.forEach(function(t){T.push(t);});save();render();}
+}
+
 function addTaskBelow(refId){
   var ref=T.find(function(x){return x.id===refId;});if(!ref)return;
-  var newTask={id:nid(),text:"",proj:ref.proj,cat:ref.cat,status:"todo",comment:"",done:false,arch:false,doneAt:null,exp:false,edit:true,subs:[],deadline:null,prio:false};
+  var newTask={id:nid(),text:"",proj:ref.proj,cat:ref.cat,status:"todo",comment:"",done:false,arch:false,doneAt:null,exp:false,edit:true,subs:[],deadline:null,prio:false,recur:null};
   var idx=T.indexOf(ref);
   T.splice(idx+1,0,newTask);
   save();renderTasks();
@@ -1140,21 +1346,26 @@ function renderArch(){
   });
 }
 
-var mainView="tasks"; // "tasks", "kanban" or "cal"
+var mainView="tasks";
 function setMainView(v){
   mainView=v;
+  document.getElementById("navDash").classList.toggle("active",v==="dash");
   document.getElementById("navTasks").classList.toggle("active",v==="tasks");
   document.getElementById("navKanban").classList.toggle("active",v==="kanban");
   document.getElementById("navCal").classList.toggle("active",v==="cal");
   render();
 }
 function render(){
-  var isCal=mainView==="cal",isKanban=mainView==="kanban";
-  document.getElementById("taskSection").style.display=(isCal||isKanban)?"none":"";
+  var isCal=mainView==="cal",isKanban=mainView==="kanban",isDash=mainView==="dash";
+  var isOther=isCal||isKanban||isDash;
+  document.getElementById("taskSection").style.display=isOther?"none":"";
   document.getElementById("calView").style.display=isCal?"":"none";
   document.getElementById("kanbanView").style.display=isKanban?"":"none";
+  document.getElementById("dashView").style.display=isDash?"":"none";
+  var sw=document.getElementById("searchWrap");if(sw)sw.style.display=isOther?"none":"";
   if(isCal){renderCal();}
   else if(isKanban){renderKanban();}
+  else if(isDash){renderDash();}
   else{renderTabs();renderSel();renderPrio();renderTasks();renderArch();}
 }
 function endOfWeekMs(){var now=new Date();now.setHours(23,59,59,999);var d=now.getDay();var daysToSun=d===0?0:7-d;now.setDate(now.getDate()+daysToSun);return now.getTime();}
@@ -1166,6 +1377,7 @@ function scheduleArchive(id){
 function markDone(t){
   t.done=true;t.status="done";t.doneAt=new Date().toISOString().slice(0,10);
   scheduleArchive(t.id);
+  setTimeout(checkRecurring,500);
 }
 function markUndone(t){
   t.done=false;t.arch=false;t.doneAt=null;t.status="todo";
@@ -1185,7 +1397,7 @@ function addTask(){
   var text=document.getElementById("newTask").value.trim();if(!text)return;
   var pid=document.getElementById("taskProj").value||(P[0]&&P[0].id)||"";
   var cid=document.getElementById("taskCat").value||null;
-  T.unshift({id:nid(),text:text,proj:pid,cat:cid,status:"todo",comment:"",done:false,arch:false,doneAt:null,exp:false,edit:false,subs:[],deadline:null,prio:false});
+  T.unshift({id:nid(),text:text,proj:pid,cat:cid,status:"todo",comment:"",done:false,arch:false,doneAt:null,exp:false,edit:false,subs:[],deadline:null,prio:false,recur:null});
   document.getElementById("newTask").value="";save();render();
   if(ap!=="all"&&ap!==pid)setProj(pid);
 }
@@ -1259,7 +1471,7 @@ render=function(){_origRender();
   if(panel&&catPanelOpen&&!isCal)renderCatPanel();
 };
 
-load();render();
+load();render();initSearch();checkRecurring();
 </script>
 <script type="module">
   import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
