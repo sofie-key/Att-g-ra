@@ -305,6 +305,7 @@ body{font-family:"EB Garamond",Georgia,serif;background:#EDECEA;min-height:100vh
     <input type="text" id="newTask" placeholder="Ny uppgift…">
     <select id="taskProj"></select>
     <select id="taskCat"></select>
+    <input type="date" id="newTaskDeadline" class="deadline-input" title="Deadline (valfritt)" style="height:34px;flex-shrink:0">
     <button class="btn" id="addTaskBtn">+ Lägg till</button>
   </div>
   <div id="taskList"></div>
@@ -637,7 +638,7 @@ function renderTabs(){
 
 function renderSel(){
   var sel=document.getElementById("taskProj");sel.innerHTML="";
-  P.forEach(function(p){var o=document.createElement("option");o.value=p.id;o.textContent=p.name;sel.appendChild(o);});
+  P.forEach(function(p){var o=document.createElement("option");o.value=p.id;o.textContent=p.name;if(ap!=="all"&&p.id===ap)o.selected=true;sel.appendChild(o);});
   renderCatSel();
 }
 
@@ -796,6 +797,17 @@ function makeCard(t){
     recurSel.onchange=(function(id){return function(){var tx=T.find(function(x){return x.id===id;});if(tx){tx.recur=this.value||null;save();renderTasks();}};})(t.id);
     drRec.appendChild(recurSel);
     det.appendChild(drRec);
+    // Category row
+    var drCat=el("div","drow");
+    drCat.appendChild(el("span","dlabel","Kategori"));
+    var catSel2=document.createElement("select");catSel2.className="recur-select";
+    var proj2=P.find(function(p){return p.id===t.proj;});
+    var cats2=(proj2&&proj2.cats)||[];
+    var noneOpt=document.createElement("option");noneOpt.value="";noneOpt.textContent="Ingen kategori";catSel2.appendChild(noneOpt);
+    cats2.forEach(function(c){var o=document.createElement("option");o.value=c.id;o.textContent=c.name;if(t.cat===c.id)o.selected=true;catSel2.appendChild(o);});
+    catSel2.onchange=(function(id){return function(){var tx=T.find(function(x){return x.id===id;});if(tx){tx.cat=this.value||null;save();renderTasks();}};})(t.id);
+    drCat.appendChild(catSel2);
+    det.appendChild(drCat);
     var dr2=el("div","drow");
     dr2.appendChild(el("span","dlabel","Kommentar"));
     var ta=document.createElement("textarea");ta.className="comment-box";ta.placeholder="Anteckna mer om uppgiften…";ta.value=t.comment||"";
@@ -1397,8 +1409,12 @@ function addTask(){
   var text=document.getElementById("newTask").value.trim();if(!text)return;
   var pid=document.getElementById("taskProj").value||(P[0]&&P[0].id)||"";
   var cid=document.getElementById("taskCat").value||null;
-  T.unshift({id:nid(),text:text,proj:pid,cat:cid,status:"todo",comment:"",done:false,arch:false,doneAt:null,exp:false,edit:false,subs:[],deadline:null,prio:false,recur:null});
-  document.getElementById("newTask").value="";save();render();
+  var dlEl=document.getElementById("newTaskDeadline");
+  var dl=dlEl?dlEl.value||null:null;
+  T.unshift({id:nid(),text:text,proj:pid,cat:cid,status:"todo",comment:"",done:false,arch:false,doneAt:null,exp:false,edit:false,subs:[],deadline:dl,prio:false,recur:null});
+  document.getElementById("newTask").value="";
+  if(dlEl)dlEl.value="";
+  save();render();
   if(ap!=="all"&&ap!==pid)setProj(pid);
 }
 function saveEdit(id){
