@@ -305,7 +305,10 @@ body{font-family:"EB Garamond",Georgia,serif;background:#EDECEA;min-height:100vh
     <input type="text" id="newTask" placeholder="Ny uppgift…">
     <select id="taskProj"></select>
     <select id="taskCat"></select>
-    <input type="date" id="newTaskDeadline" class="deadline-input" title="Deadline (valfritt)" style="height:34px;flex-shrink:0">
+    <span style="position:relative;flex-shrink:0;display:inline-flex;align-items:center">
+      <button type="button" id="newTaskDeadlineBtn" title="Sätt deadline" style="height:34px;width:34px;border:1px solid var(--sand);border-radius:var(--r);background:white;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--sage);font-size:15px;transition:all 0.15s" onclick="document.getElementById('newTaskDeadline').showPicker()">📅</button>
+      <input type="date" id="newTaskDeadline" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none" onchange="var b=document.getElementById('newTaskDeadlineBtn');b.style.color=this.value?'var(--o)':'var(--sage)';b.style.borderColor=this.value?'var(--o)':'var(--sand)';b.title=this.value?this.value:'Sätt deadline'">
+    </span>
     <button class="btn" id="addTaskBtn">+ Lägg till</button>
   </div>
   <div id="taskList"></div>
@@ -392,7 +395,7 @@ function save(){
 function load(){
   try{
     var p=localStorage.getItem("km_p_"+userId),t=localStorage.getItem("km_t_"+userId);
-    if(p)P=JSON.parse(p);
+    if(p){P=JSON.parse(p);P.sort(function(a,b){return a.name.localeCompare(b.name,'sv');});}
     if(t){T=JSON.parse(t);T.forEach(function(tx){if(!tx.subs)tx.subs=[];if(tx.deadline===undefined)tx.deadline=null;if(tx.prio===undefined)tx.prio=false;if(tx.recur===undefined)tx.recur=null;});}
   }catch(e){}
   var db=window._fbDb;
@@ -401,7 +404,7 @@ function load(){
   getDoc(doc(db,"attgora",userId)).then(function(snap){
     if(snap.exists()){
       var d=snap.data();
-      if(d.projects)P=JSON.parse(d.projects);
+      if(d.projects){P=JSON.parse(d.projects);P.sort(function(a,b){return a.name.localeCompare(b.name,'sv');});}
       if(d.tasks){T=JSON.parse(d.tasks);T.forEach(function(tx){if(!tx.subs)tx.subs=[];if(tx.deadline===undefined)tx.deadline=null;if(tx.prio===undefined)tx.prio=false;if(tx.recur===undefined)tx.recur=null;});}
       render();
     }
@@ -416,6 +419,7 @@ document.addEventListener("click",function(e){
 document.getElementById("newProjBtn").onclick=function(){
   var id=nid(),ci=P.length%PAL.length;
   P.push({id:id,name:"Nytt projekt",ci:ci,cats:[]});
+  P.sort(function(a,b){return a.name.localeCompare(b.name,"sv");});
   openPop=id;save();render();
   setTimeout(function(){var e=document.getElementById("pn_"+id);if(e){e.focus();e.select();}},40);
 };
